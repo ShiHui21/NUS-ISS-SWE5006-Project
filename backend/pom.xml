@@ -55,6 +55,25 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>3.0.2</version> <!-- Fixed version -->
+		</dependency>
+
+		<!-- Hibernate Validator (compatible with Jakarta Validation) -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>7.0.5.Final</version> <!-- Compatible with Jakarta Validation 3.0.x -->
+		</dependency>
+
+		<!-- For runtime dependency, you may need this as well -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+			<version>4.0.2</version> <!-- ✅ Stable & available -->
+		</dependency>
 	</dependencies>
 
 	<build>
