@@ -30,9 +30,7 @@ public class UserCreateDTO {
         return this.password;
     }
 
-    public String getName() {
-        return this.name;
-    }
+    public String getName() { return this.name; }
 
     public String getEmail() {
         return this.email;
@@ -44,5 +42,27 @@ public class UserCreateDTO {
 
     public String getLocation() {
         return this.location;
+    }
+
+    public void setUsername(String username) {this.username = username; }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

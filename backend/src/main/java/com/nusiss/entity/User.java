@@ -1,12 +1,20 @@
 package com.nusiss.entity;
 
 import com.nusiss.dto.UserCreateDTO;
+import com.nusiss.util.PasswordUtil;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+
 public class User {
-    @Id @GeneratedValue
+    @Id
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @GeneratedValue
     private UUID id;
 
     private String username;
@@ -16,16 +24,30 @@ public class User {
     private String mobileNumber;
     private String location;
 
-    public static User fromDTO(UserCreateDTO dto) {
-        User user = new User();
-        user.username = dto.getUsername();
-        user.password = dto.getPassword();
-        user.name = dto.getName();
-        user.email = dto.getEmail();
-        user.mobileNumber = dto.getMobileNumber();
-        user.location = dto.getLocation();
-        return user;
+    @Version
+    private int version;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdOn;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdOn == null) {
+            createdOn = LocalDateTime.now();
+        }
     }
+//    public static User fromDTO(UserCreateDTO dto) {
+//        User user = new User();
+//        user.username = dto.getUsername();
+//        user.password = dto.getPassword();
+//        user.name = dto.getName();
+//        user.email = dto.getEmail();
+//        user.mobileNumber = dto.getMobileNumber();
+//        user.location = dto.getLocation();
+//        return user;
+//    }
+
+    public UUID getId() { return this.id; }
 
     public void setUsername(String username) {
         this.username = username;
@@ -36,7 +58,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = PasswordUtil.hashPassword((password));
     }
 
     public String getPassword() {
