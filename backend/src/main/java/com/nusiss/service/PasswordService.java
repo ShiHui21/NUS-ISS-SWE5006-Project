@@ -1,5 +1,6 @@
 package com.nusiss.service;
 
+import com.nusiss.dto.PasswordChangeDTO;
 import com.nusiss.entity.User;
 import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.repository.UserRepository;
@@ -27,17 +28,17 @@ public class PasswordService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<String> updatePassword(UUID id, String currentPassword, String newPassword) {
+    public ResponseEntity<String> updatePassword(UUID id, PasswordChangeDTO passwordChangeDTO) {
         User user = userRepository.getUserById(id).orElseThrow(() -> new UserNotFoundException(id));
 
-        if(!PasswordUtil.matches(currentPassword, user.getPassword())) {
+        if(!PasswordUtil.matches(passwordChangeDTO.getCurrentPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Current password is incorrect");
         }
-        if (!validationService.isPasswordValid(newPassword)) {
+        if (!validationService.isPasswordValid(passwordChangeDTO.getNewPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be at least 8 characters long, include at least one letter, one number, and one symbol, and must not contain any spaces.");
         }
 
-        user.setPassword(newPassword);
+        user.setPassword(passwordChangeDTO.getNewPassword());
         userRepository.save(user);
 
         return ResponseEntity.ok("Password updated successfully");

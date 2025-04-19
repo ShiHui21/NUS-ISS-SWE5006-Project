@@ -57,13 +57,9 @@ public class User {
         return this.username;
     }
 
-    public void setPassword(String password) {
-        this.password = PasswordUtil.hashPassword((password));
-    }
+    public void setPassword(String password) { this.password = PasswordUtil.hashPassword((password)); }
 
-    public String getPassword() {
-        return this.password;
-    }
+    public String getPassword() { return this.password; }
 
     public void setName(String name) {
         this.name = name;

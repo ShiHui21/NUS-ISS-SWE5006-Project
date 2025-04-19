@@ -44,7 +44,7 @@ public class ValidationService {
     }
 
     public boolean isPasswordValid(String password) {
-        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\\\d)(?=.*[^A-Za-z\\\\d])(?!.*\\\\s).{8,}$";
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d])(?!.*\\s).{8,}$";
         return password != null && password.matches(passwordRegex);
     }
 }

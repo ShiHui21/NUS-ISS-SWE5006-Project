@@ -1,5 +1,6 @@
 package com.nusiss.service;
 
+import com.nusiss.config.AuthenticateUser;
 import com.nusiss.dto.UserDTO;
 import com.nusiss.dto.UserUpdateDTO;
 import com.nusiss.entity.User;
@@ -33,6 +34,7 @@ public class UserDetailService implements UserDetailsService {
     }
 
     public ResponseEntity<String> updateUser(UUID id, UserUpdateDTO userUpdateDTO) {
+
         System.out.println("Inside updateUser method");
 
         User user = userRepository.getUserById(id).orElseThrow(() -> new UserNotFoundException(id));
@@ -96,7 +98,8 @@ public class UserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         User user = userRepository.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new AuthenticateUser(
+                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
                 new ArrayList<>() // Authorities/roles — leave empty for now
