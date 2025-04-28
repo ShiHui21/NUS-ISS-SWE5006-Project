@@ -1,11 +1,10 @@
 package com.nusiss.dto;
 
 import com.nusiss.entity.User;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public class UserDTO {
+public class SetUserDetailsDTO {
 
     private UUID id;
 
@@ -21,7 +20,7 @@ public class UserDTO {
 
 //    public UserDTO() {} // No-arg constructor
 
-    public UserDTO(UUID id, String username, String name, String email, String mobileNumber, String location) {
+    public SetUserDetailsDTO(UUID id, String username, String name, String email, String mobileNumber, String location) {
         this.id = id;
         this.username = username;
         this.name = name;
@@ -30,7 +29,7 @@ public class UserDTO {
         this.location = location;
     }
 
-    public UserDTO(User user) {
+    public SetUserDetailsDTO(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.name = user.getName();
