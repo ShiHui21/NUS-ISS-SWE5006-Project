@@ -1,4 +1,12 @@
 package com.nusiss.repository;
 
-public interface ListingRepository {
+import com.nusiss.entity.Listing;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpecificationExecutor<Listing> {
+    List<Listing> findAllBySeller_Id(UUID sellerId);
 }

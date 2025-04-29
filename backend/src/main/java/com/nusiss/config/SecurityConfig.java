@@ -1,7 +1,7 @@
 package com.nusiss.config;
 
+import com.nusiss.service.UserService;
 import com.nusiss.util.PasswordUtil;
-import com.nusiss.service.UserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,12 +19,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final UserDetailService userDetailService;  // Inject UserDetailService
+    private final UserService userService;  // Inject UserDetailService
 
     // Constructor Injection for JwtFilter and UserDetailService
-    public SecurityConfig(JwtFilter jwtFilter, UserDetailService userDetailService) {
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService) {
         this.jwtFilter = jwtFilter;
-        this.userDetailService = userDetailService;
+        this.userService = userService;
     }
 
     @Bean
@@ -55,7 +55,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailService);  // Use your user details service to load users
+        provider.setUserDetailsService(userService);  // Use your user details service to load users
         provider.setPasswordEncoder(passwordEncoder());  // Use PasswordEncoder
         return provider;
     }

@@ -1,6 +1,6 @@
 package com.nusiss.config;
 
-import com.nusiss.service.UserDetailService;
+import com.nusiss.service.UserService;
 import com.nusiss.util.JwtUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserDetailService userDetailsService;
+    private UserService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

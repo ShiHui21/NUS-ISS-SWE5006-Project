@@ -8,13 +8,22 @@ public enum CardCondition {
     HEAVILY_USED("Heavily Used"),
     DAMAGED("Damage");
 
-    private final String conditionDisplayName;
+    private final String cardConditionDisplayName;
 
-    CardCondition(String conditionDisplayName) {
-        this.conditionDisplayName = conditionDisplayName;
+    CardCondition(String cardConditionDisplayName) {
+        this.cardConditionDisplayName = cardConditionDisplayName;
     }
 
-    public String getConditionDisplayName() {
-        return conditionDisplayName;
+    public String getCardConditionDisplayName() {
+        return cardConditionDisplayName;
+    }
+
+    public static CardCondition fromCardConditionDisplayName(String cardConditionDisplayName) {
+        for (CardCondition cardCondition : CardCondition.values()) {
+            if (cardCondition.getCardConditionDisplayName().equalsIgnoreCase(cardConditionDisplayName)) {
+                return cardCondition;
+            }
+        }
+        throw new IllegalArgumentException("Unknown card condition: " + cardConditionDisplayName);
     }
 }

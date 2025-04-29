@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,15 +45,25 @@ public class Listing {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User seller;
 
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdOn;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdOn == null) {
+            createdOn = LocalDateTime.now(); // Set the current timestamp
+        }
+    }
+
     public UUID getId() { return this.id; }
 
     public String getListingTitle() { return listingTitle; }
 
     public void setListingTitle(String listingTitle) { this.listingTitle = listingTitle; }
 
-    public CardCondition getCondition() { return cardCondition; }
+    public CardCondition getCardCondition() { return cardCondition; }
 
-    public void setCondition(CardCondition cardCondition) { this.cardCondition = cardCondition; }
+    public void setCardCondition(CardCondition cardCondition) { this.cardCondition = cardCondition; }
 
     public CardType getCardType() { return cardType; }
 
@@ -81,4 +92,6 @@ public class Listing {
     public User getSeller() { return seller; }
 
     public void setSeller(User seller) { this.seller = seller; }
+
+    public LocalDateTime getCreatedOn() { return createdOn; }
 }

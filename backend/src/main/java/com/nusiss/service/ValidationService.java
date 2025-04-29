@@ -27,8 +27,7 @@ public class ValidationService {
     }
     public boolean isEmailTaken(String email) {
         System.out.println("Checking if email exists: " + email); // This should print to the console
-        Optional<User> existingEmail = userRepository.findUserByEmail(email);
-        System.out.println("Checking if email exists: " + email + ", Found: " + existingEmail.isPresent());
+        Optional<User> existingEmail = userRepository.findByEmailIgnoreCase(email);
         return existingEmail.isPresent();
     }
 
@@ -38,7 +37,7 @@ public class ValidationService {
     }
     public boolean isUsernameTaken(String username) {
         System.out.println("Checking if username exists: " + username); // This should print to the console
-        Optional<User> existingUser = userRepository.findUserByUsername(username);
+        Optional<User> existingUser = userRepository.findByUsernameIgnoreCase(username);
         System.out.println("Found: " + existingUser.isPresent()); // This should print whether the user is found or not
         return existingUser.isPresent();
     }

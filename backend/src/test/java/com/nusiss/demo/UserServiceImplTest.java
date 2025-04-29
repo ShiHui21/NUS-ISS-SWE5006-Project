@@ -56,7 +56,7 @@
 //        assertEquals("User registered successfully!", response.getBody());
 //
 //        // Verify the user was saved in the DB
-//        User savedUser = userRepository.findUserByUsername("pokemonneo123").orElse(null);
+//        User savedUser = userRepository.findByUsernameIgnoreCase("pokemonneo123").orElse(null);
 //        assertNotNull(savedUser);
 //        System.out.println("User saved in DB: " + savedUser);
 //    }

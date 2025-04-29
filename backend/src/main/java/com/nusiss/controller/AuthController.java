@@ -1,7 +1,9 @@
 package com.nusiss.controller;
 
-import com.nusiss.dto.AuthRequestDTO;
-import com.nusiss.service.UserDetailService;
+import com.nusiss.dto.LoginDTO;
+import com.nusiss.dto.CreateUserDTO;
+import com.nusiss.service.AuthService;
+import com.nusiss.service.UserService;
 import com.nusiss.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,19 +19,34 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final UserDetailService userDetailsService;
+    private final UserService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
     public AuthController(AuthenticationManager authenticationManager,
-                          UserDetailService userDetailsService,
+                          UserService userDetailsService, AuthService authService,
                           JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
+        this.authService = authService;
         this.jwtUtil = jwtUtil;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<String> createUser(@RequestBody @Valid CreateUserDTO createUserDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMessages = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMessages.append(error.getDefaultMessage()).append(" ");
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
+        }
+
+        return authService.createUser(createUserDTO);
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid AuthRequestDTO authRequestDTO, BindingResult bindingResult) {
+    public ResponseEntity<String> login(@RequestBody @Valid LoginDTO loginDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessages = new StringBuilder();
             for (ObjectError error : bindingResult.getAllErrors()) {
@@ -39,11 +56,12 @@ public class AuthController {
         }
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword())
+                new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
         );
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequestDTO.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
+
         return ResponseEntity.ok(token);
     }
 }

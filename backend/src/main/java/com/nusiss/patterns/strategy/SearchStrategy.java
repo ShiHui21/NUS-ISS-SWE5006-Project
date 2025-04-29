@@ -5,6 +5,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Map;
 
-public interface SearchFilterStrategy {
+public interface SearchStrategy {
     Specification<Listing> searchSpecifications(Map<String, String> params);
 }

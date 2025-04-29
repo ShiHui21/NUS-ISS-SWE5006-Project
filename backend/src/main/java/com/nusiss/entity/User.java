@@ -1,6 +1,5 @@
 package com.nusiss.entity;
 
-import com.nusiss.dto.UserCreateDTO;
 import com.nusiss.util.PasswordUtil;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -36,22 +35,12 @@ public class User {
             createdOn = LocalDateTime.now();
         }
     }
-//    public static User fromDTO(UserCreateDTO dto) {
-//        User user = new User();
-//        user.username = dto.getUsername();
-//        user.password = dto.getPassword();
-//        user.name = dto.getName();
-//        user.email = dto.getEmail();
-//        user.mobileNumber = dto.getMobileNumber();
-//        user.location = dto.getLocation();
-//        return user;
-//    }
 
     public UUID getId() { return this.id; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public void setId(UUID id) { this.id = id; }
+
+    public void setUsername(String username) { this.username = username; }
 
     public String getUsername() {
         return this.username;

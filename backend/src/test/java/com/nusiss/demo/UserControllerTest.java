@@ -48,7 +48,7 @@
 //                .andExpect(jsonPath("$.id").isNotEmpty()); // Validate that the user ID is not empty
 //
 //        // Optionally: Verify that the user was saved in the database
-//        User savedUser = userRepository.findUserByUsername("pokemonneo123").orElseThrow();
+//        User savedUser = userRepository.findByUsernameIgnoreCase("pokemonneo123").orElseThrow();
 //        assertEquals("pokemonneo123", savedUser.getUsername());
 //    }
 //

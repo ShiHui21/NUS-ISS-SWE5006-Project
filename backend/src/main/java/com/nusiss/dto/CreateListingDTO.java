@@ -3,23 +3,32 @@ package com.nusiss.dto;
 import com.nusiss.enums.CardType;
 import com.nusiss.enums.CardCondition;
 import com.nusiss.enums.Rarity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListingCreateDTO {
+public class CreateListingDTO {
 
+    @NotBlank(message = "Listing Title is required!")
     private String listingTitle;
 
-    private CardCondition cardCondition;
+    @NotBlank(message = "Card Condition is required!")
+    private String cardCondition;
 
-    private CardType cardType;
+    @NotBlank(message = "Card Type is required!")
+    private String cardType;
 
-    private Rarity rarity;
+    @NotBlank(message = "Rarity is required!")
+    private String rarity;
 
+    @NotEmpty(message = "At least one image URL is required")
     private List<String> images = new ArrayList<>();
 
+    @NotNull(message = "Selling price for card is required!")
     private BigDecimal price;
 
     private String status;
@@ -28,11 +37,11 @@ public class ListingCreateDTO {
 
     public String getListingTitle() { return listingTitle; }
 
-    public CardCondition getCardCondition() { return cardCondition; }
+    public String getCardCondition() { return cardCondition; }
 
-    public CardType getCardType() { return cardType; }
+    public String getCardType() { return cardType; }
 
-    public Rarity getRarity() { return rarity; }
+    public String getRarity() { return rarity; }
 
     public List<String> getImages() { return images; }
 

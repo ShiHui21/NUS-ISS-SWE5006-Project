@@ -4,9 +4,7 @@ import com.nusiss.entity.User;
 
 import java.util.UUID;
 
-public class SetUserDetailsDTO {
-
-    private UUID id;
+public class GetUserDetailsDTO {
 
     private String username;
 
@@ -18,19 +16,7 @@ public class SetUserDetailsDTO {
 
     private String location;
 
-//    public UserDTO() {} // No-arg constructor
-
-    public SetUserDetailsDTO(UUID id, String username, String name, String email, String mobileNumber, String location) {
-        this.id = id;
-        this.username = username;
-        this.name = name;
-        this.email = email;
-        this.mobileNumber = mobileNumber;
-        this.location = location;
-    }
-
-    public SetUserDetailsDTO(User user) {
-        this.id = user.getId();
+    public GetUserDetailsDTO(User user) {
         this.username = user.getUsername();
         this.name = user.getName();
         this.email = user.getEmail();

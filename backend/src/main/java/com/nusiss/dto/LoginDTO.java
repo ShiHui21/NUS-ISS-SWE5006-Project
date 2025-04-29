@@ -2,7 +2,7 @@ package com.nusiss.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class AuthRequestDTO {
+public class LoginDTO {
 
     @NotBlank(message = "Username is required")
     private String username;

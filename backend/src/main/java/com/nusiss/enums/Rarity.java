@@ -18,4 +18,13 @@ public enum Rarity {
     public String getRarityDisplayName() {
         return rarityDisplayName;
     }
+
+    public static Rarity fromRarityDisplayName(String rarityDisplayName) {
+        for (Rarity rarity : Rarity.values()) {
+            if (rarity.getRarityDisplayName().equalsIgnoreCase(rarityDisplayName)) {
+                return rarity;
+            }
+        }
+        throw new IllegalArgumentException("Unknown rarity: " + rarityDisplayName);
+    }
 }

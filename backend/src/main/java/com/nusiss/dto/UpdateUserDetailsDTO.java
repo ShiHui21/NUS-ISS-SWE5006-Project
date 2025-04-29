@@ -1,13 +1,12 @@
 package com.nusiss.dto;
 
-import com.nusiss.entity.User;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public class UserUpdateDTO {
+public class UpdateUserDetailsDTO {
 
-    private UUID id;
+//    private UUID id;
 
     @NotBlank(message = "Username is required")
     private String username;

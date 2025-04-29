@@ -2,7 +2,7 @@ package com.nusiss.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class PasswordChangeDTO {
+public class UpdatePasswordDTO {
 
     @NotBlank(message = "Current password is required")
     String currentPassword;
@@ -10,7 +10,7 @@ public class PasswordChangeDTO {
     @NotBlank(message = "New password is required")
     String newPassword;
 
-    public PasswordChangeDTO(String currentPassword, String newPassword) {
+    public UpdatePasswordDTO(String currentPassword, String newPassword) {
         this.currentPassword = currentPassword;
         this.newPassword = newPassword;
     }
