@@ -6,11 +6,12 @@ import com.nusiss.entity.User;
 import com.nusiss.enums.CardCondition;
 import com.nusiss.enums.CardType;
 import com.nusiss.enums.Rarity;
-import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.patterns.factory.ListingFactory;
 import com.nusiss.patterns.factory.PokemonCardListingFactory;
 import com.nusiss.patterns.factory.TrainerCardListingFactory;
 import com.nusiss.patterns.strategy.FilterSearchStrategy;
+import com.nusiss.patterns.strategy.SearchStrategy;
+import com.nusiss.patterns.strategy.UserExclusionStrategy;
 import com.nusiss.patterns.strategy.UsernameSearchStrategy;
 import com.nusiss.repository.ListingRepository;
 import com.nusiss.repository.UserRepository;
@@ -22,18 +23,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.jpa.repository.query.KeysetScrollSpecification.createSort;
 
 @Service
 public class ListingService {
@@ -144,18 +140,27 @@ public class ListingService {
 //        return new GetListingsByUserDTO(userDetailsDTO.getUsername(), userDetailsDTO.getLocation(), listingSummariesDTOs);
 //    }
 
-    public GetListingsBySummaryDTO  getListings(Map<String, String> params, int page, int size) {
+    public GetListingsDTO getListings(Map<String, String> params, UUID userId, boolean excludeCurrentUser, int page, int size) {
 
-        Specification<Listing> spec = Specification.where(null);
+        List<SearchStrategy> strategies = new ArrayList<>();
 
-        // Apply the username search strategy if provided
         if (params.containsKey("username")) {
-            spec = spec.and(new UsernameSearchStrategy().searchSpecifications(params));
+            strategies.add(new UsernameSearchStrategy());
         }
 
         if (params.containsKey("minPrice") || params.containsKey("maxPrice") ||
                 params.containsKey("condition") || params.containsKey("listingStatus")) {
-            spec = spec.and(new FilterSearchStrategy().searchSpecifications(params));
+            strategies.add(new FilterSearchStrategy());
+        }
+
+        strategies.add(new UserExclusionStrategy(userId, excludeCurrentUser));
+
+        Specification<Listing> spec = Specification.where(null);
+        for (SearchStrategy strategy : strategies) {
+            Specification<Listing> strategySpec = strategy.searchSpecifications(params);
+            if (strategySpec != null) {
+                spec = spec.and(strategySpec);
+            }
         }
 
         String sortBy = params.getOrDefault("sortBy", "createdOn");
@@ -164,7 +169,7 @@ public class ListingService {
         int currSize = Integer.parseInt(params.getOrDefault("size", "10"));
         Sort sort = createSort(sortBy, sortOrder);
 
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        PageRequest pageRequest = PageRequest.of(currPage, currSize, sort);
 
         Page<Listing> listingsPage = listingRepository.findAll(spec, pageRequest);
 
@@ -172,14 +177,14 @@ public class ListingService {
                 .map(listing -> new GetListingSummaryDTO(listing))
                 .collect(Collectors.toList());
 
-        GetListingsBySummaryDTO getListingsBySummaryDTO = new GetListingsBySummaryDTO();
-        getListingsBySummaryDTO.setListings(listingSummaries);
-        getListingsBySummaryDTO.setTotalElements(listingsPage.getTotalElements());
-        getListingsBySummaryDTO.setTotalPages(listingsPage.getTotalPages());
-        getListingsBySummaryDTO.setCurrentPage(listingsPage.getNumber());
-        getListingsBySummaryDTO.setPageSize(listingsPage.getSize());
+        GetListingsDTO getListingsDTO = new GetListingsDTO();
+        getListingsDTO.setListings(listingSummaries);
+        getListingsDTO.setTotalElements(listingsPage.getTotalElements());
+        getListingsDTO.setTotalPages(listingsPage.getTotalPages());
+        getListingsDTO.setCurrentPage(listingsPage.getNumber());
+        getListingsDTO.setPageSize(listingsPage.getSize());
 
-        return getListingsBySummaryDTO;
+        return getListingsDTO;
     }
 
     public GetListingDetailsDTO getListingDetails(UUID listingId) {

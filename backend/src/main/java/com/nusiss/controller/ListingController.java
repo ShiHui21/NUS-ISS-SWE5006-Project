@@ -4,12 +4,9 @@ import com.nusiss.config.AuthenticateUser;
 import com.nusiss.dto.*;
 import com.nusiss.service.ListingService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +47,7 @@ public class ListingController {
             for(ObjectError objectError : bindingResult.getAllErrors()) {
                 errorMessages.append(objectError.getDefaultMessage()).append(" ");
             }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
         }
         UUID userId = authenticateUser.getUserId();
 
@@ -64,13 +62,14 @@ public class ListingController {
     }
 
     @GetMapping("/get-all-listing")
-    public ResponseEntity<GetListingsBySummaryDTO> getListings(@RequestParam Map<String, String> params,
-                                                            @RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int size,
-                                                            @AuthenticationPrincipal AuthenticateUser authenticateUser) {
+    public ResponseEntity<GetListingsDTO> getListings(@RequestParam Map<String, String> params,
+                                                      @RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "10") int size,
+                                                      @RequestParam boolean excludeUser,
+                                                      @AuthenticationPrincipal AuthenticateUser authenticateUser) {
         UUID userId = authenticateUser.getUserId();
 
-        return ResponseEntity.ok(listingService.getListings(params, page, size));
+        return ResponseEntity.ok(listingService.getListings(params, userId, excludeUser, page, size));
     }
 
     @GetMapping("/get-listing-details/{id}")

@@ -2,7 +2,7 @@ package com.nusiss.dto;
 
 import java.util.List;
 
-public class GetListingsBySummaryDTO {
+public class GetListingsDTO {
 
     private List<GetListingSummaryDTO> listings;
     private long totalElements;

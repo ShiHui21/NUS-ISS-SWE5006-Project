@@ -57,9 +57,7 @@ public class GetListingSummaryDTO {
         return mainImage;
     }
 
-    public LocalDateTime getListedOn() {
-        return listedOn;
-    }
+    public LocalDateTime getListedOn() { return listedOn; }
 
     public String getUsername() {
         return username;
