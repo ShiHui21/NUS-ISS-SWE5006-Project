@@ -1,10 +1,15 @@
 package com.nusiss.controller;
 
-import com.nusiss.dto.UserCreateDTO;
-import com.nusiss.dto.UserDTO;
+import com.nusiss.config.AuthenticateUser;
+import com.nusiss.dto.UpdatePasswordDTO;
+import com.nusiss.dto.GetUserDetailsDTO;
+import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -12,19 +17,50 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/user")
+@RequestMapping("user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody @Valid UserCreateDTO userCreateDTO) {
-        return userService.registerUser(userCreateDTO);
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable UUID id) {
-        return ResponseEntity.ok(userService.getUser(id));
+    @PutMapping("/update-details")
+    public ResponseEntity<String> updateUser(@RequestBody @Valid UpdateUserDetailsDTO updateUserDetailsDTO, @AuthenticationPrincipal
+    AuthenticateUser authenticateUser, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMessages = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMessages.append(error.getDefaultMessage()).append(" ");
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
+        }
+        UUID userId = authenticateUser.getUserId();
+
+        return userService.updateUser(userId, updateUserDetailsDTO);
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<String> updatePassword(@RequestBody @Valid UpdatePasswordDTO updatePasswordDTO, @AuthenticationPrincipal
+AuthenticateUser authenticateUser, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMessages = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMessages.append(error.getDefaultMessage()).append(" ");
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
+        }
+        UUID userId = authenticateUser.getUserId();
+
+        return userService.updatePassword(userId, updatePasswordDTO);
+    }
+
+    @GetMapping("/get-details")
+    public ResponseEntity<GetUserDetailsDTO> getUser(@AuthenticationPrincipal AuthenticateUser authenticateUser) {
+
+        UUID userId = authenticateUser.getUserId();
+
+        return ResponseEntity.ok(userService.getUserByID(userId));
     }
 }

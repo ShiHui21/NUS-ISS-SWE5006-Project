@@ -2,7 +2,7 @@ package com.nusiss.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class UserCreateDTO {
+public class CreateUserDTO {
 
     @NotBlank(message = "Username is required")
     private String username;
@@ -30,9 +30,7 @@ public class UserCreateDTO {
         return this.password;
     }
 
-    public String getName() {
-        return this.name;
-    }
+    public String getName() { return this.name; }
 
     public String getEmail() {
         return this.email;

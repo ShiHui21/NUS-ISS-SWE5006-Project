@@ -1,0 +1,49 @@
+package com.nusiss.service;
+
+import com.nusiss.entity.User;
+import com.nusiss.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class ValidationService {
+
+    @Autowired
+    private final UserRepository userRepository;
+
+
+    @Autowired
+    public ValidationService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public boolean isEmailValid(String email) {
+//        String emailRegex = "^[A-Za-z0-9+_.-]{6,30}@[A-Za-z0-9]{2,}(\\.[A-Za-z]{2,})+$";
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        System.out.println("Validating email: " + email + " -> " + email.matches(emailRegex));
+        return email.matches(emailRegex);
+    }
+    public boolean isEmailTaken(String email) {
+        System.out.println("Checking if email exists: " + email); // This should print to the console
+        Optional<User> existingEmail = userRepository.findByEmailIgnoreCase(email);
+        return existingEmail.isPresent();
+    }
+
+    public boolean isUsernameValid(String username) {
+        String usernameRegex = "^(?!.*\\.\\.)(?!.*\\.$)(?!^\\.)[A-Za-z0-9_]{6,30}$";
+        return username != null && username.matches(usernameRegex);
+    }
+    public boolean isUsernameTaken(String username) {
+        System.out.println("Checking if username exists: " + username); // This should print to the console
+        Optional<User> existingUser = userRepository.findByUsernameIgnoreCase(username);
+        System.out.println("Found: " + existingUser.isPresent()); // This should print whether the user is found or not
+        return existingUser.isPresent();
+    }
+
+    public boolean isPasswordValid(String password) {
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d])(?!.*\\s).{8,}$";
+        return password != null && password.matches(passwordRegex);
+    }
+}

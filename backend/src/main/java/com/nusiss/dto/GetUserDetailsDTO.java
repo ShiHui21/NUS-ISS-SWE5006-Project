@@ -4,15 +4,19 @@ import com.nusiss.entity.User;
 
 import java.util.UUID;
 
-public class UserDTO {
-    private UUID id;
+public class GetUserDetailsDTO {
+
     private String username;
+
     private String name;
+
     private String email;
+
     private String mobileNumber;
+
     private String location;
 
-    public UserDTO(User user) {
+    public GetUserDetailsDTO(User user) {
         this.username = user.getUsername();
         this.name = user.getName();
         this.email = user.getEmail();
@@ -20,5 +24,14 @@ public class UserDTO {
         this.location = user.getLocation();
     }
 
-    // Getters and setters
+    public String getUsername() {return this.username; }
+
+    public String getName() { return this.name; }
+
+    public String getEmail() { return this.email; }
+
+    public String getMobileNumber() {return this.mobileNumber; }
+
+    public String getLocation() {return this.location; }
+
 }
