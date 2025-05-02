@@ -56,10 +56,10 @@ public class AuthController {
         }
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
+                new UsernamePasswordAuthenticationToken(loginDTO.getIdentifier(), loginDTO.getPassword())
         );
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getIdentifier());
         String token = jwtUtil.generateToken(userDetails.getUsername());
 
         return ResponseEntity.ok(token);

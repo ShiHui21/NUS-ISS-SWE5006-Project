@@ -113,8 +113,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String identifier) {
+        User user = userRepository.findByUsernameIgnoreCase(identifier).orElseGet(() -> {
+            return userRepository.findByEmailIgnoreCase(identifier)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        });
 
         return new AuthenticateUser(
                 user.getId(),
