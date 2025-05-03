@@ -22,9 +22,11 @@ public class ValidationService {
     public boolean isEmailValid(String email) {
 //        String emailRegex = "^[A-Za-z0-9+_.-]{6,30}@[A-Za-z0-9]{2,}(\\.[A-Za-z]{2,})+$";
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        System.out.println("Email input: >" + email + "< (length: " + email.length() + ")");
         System.out.println("Validating email: " + email + " -> " + email.matches(emailRegex));
         return email.matches(emailRegex);
     }
+
     public boolean isEmailTaken(String email) {
         System.out.println("Checking if email exists: " + email); // This should print to the console
         Optional<User> existingEmail = userRepository.findByEmailIgnoreCase(email);
@@ -35,6 +37,7 @@ public class ValidationService {
         String usernameRegex = "^(?!.*\\.\\.)(?!.*\\.$)(?!^\\.)[A-Za-z0-9_]{6,30}$";
         return username != null && username.matches(usernameRegex);
     }
+
     public boolean isUsernameTaken(String username) {
         System.out.println("Checking if username exists: " + username); // This should print to the console
         Optional<User> existingUser = userRepository.findByUsernameIgnoreCase(username);
