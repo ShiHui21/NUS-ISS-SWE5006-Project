@@ -14,6 +14,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -46,13 +49,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginDTO loginDTO, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginDTO loginDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessages = new StringBuilder();
             for (ObjectError error : bindingResult.getAllErrors()) {
                 errorMessages.append(error.getDefaultMessage()).append(" ");
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
+            // Create error response map
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", errorMessages.toString().trim());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
 
         authenticationManager.authenticate(
@@ -62,6 +68,9 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
 
-        return ResponseEntity.ok(token);
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 }
