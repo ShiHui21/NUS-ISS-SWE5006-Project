@@ -122,7 +122,7 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 value={formData.description}
                 onChange={handleChange}
                 required
-                className="min-h-[100px] border-gray-200 focus:border-blue-300"
+                className="min-h-[100px] resize-none border-gray-200 focus:border-blue-300"
               />
             </div>
 
@@ -132,8 +132,8 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 id="price"
                 name="price"
                 type="number"
-                min="2"
-                max="100"
+                // min="2"
+                // max="100"
                 step="0.01"
                 value={formData.price}
                 onChange={handleChange}

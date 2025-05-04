@@ -2,17 +2,21 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { loginUser, logoutUser, getUserDetails } from "@/lib/api-service"
 
 interface User {
   id: string
   name: string
   email: string
+  username: string
+  mobile: string
+  region: string
 }
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
 }
 
@@ -38,16 +42,26 @@ export default function ClientAuthProvider({ children }: ClientAuthProviderProps
 
   useEffect(() => {
     // Check if user is logged in
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        // This would be replaced with actual API call to Spring Boot backend
-        const storedUser = localStorage.getItem("user")
+        const token = localStorage.getItem("auth_token")
 
-        if (storedUser) {
-          setUser(JSON.parse(storedUser))
+        if (token) {
+          // Fetch user details from the backend
+          const userDetails = await getUserDetails()
+          setUser({
+            id: userDetails.id,
+            name: userDetails.name,
+            email: userDetails.email,
+            username: userDetails.username,
+            mobile: userDetails.mobile,
+            region: userDetails.region,
+          })
         }
       } catch (error) {
         console.error("Auth check error:", error)
+        // Clear token if it's invalid
+        localStorage.removeItem("auth_token")
       } finally {
         setLoading(false)
       }
@@ -95,24 +109,27 @@ export default function ClientAuthProvider({ children }: ClientAuthProviderProps
     return () => window.removeEventListener("popstate", handlePopState)
   }, [user, loading, pathname, router])
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setLoading(true)
 
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      // For now, we'll simulate a successful login with mock data
-      const mockUser = {
-        id: "user-123",
-        name: "Demo User",
-        email,
-      }
+      // Call the login API
+      await loginUser(username, password)
 
-      // Store user in state and localStorage
-      setUser(mockUser)
-      localStorage.setItem("user", JSON.stringify(mockUser))
+      // Fetch user details after successful login
+      const userDetails = await getUserDetails()
 
-      // Return success
-      // return true
+      // Set user in state
+      setUser({
+        id: userDetails.id,
+        name: userDetails.name,
+        email: userDetails.email,
+        username: userDetails.username,
+        mobile: userDetails.mobile,
+        region: userDetails.region,
+      })
+
+      return true
     } catch (error) {
       console.error("Login error:", error)
       throw error
@@ -125,10 +142,9 @@ export default function ClientAuthProvider({ children }: ClientAuthProviderProps
     setLoading(true)
 
     try {
-      // This would be replaced with actual API call to Spring Boot backend
+      // Call the logout function
+      logoutUser()
       setUser(null)
-      localStorage.removeItem("user")
-      router.push("/login")
     } catch (error) {
       console.error("Logout error:", error)
     } finally {

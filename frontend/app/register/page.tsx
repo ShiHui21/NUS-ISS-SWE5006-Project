@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { registerUser } from "@/lib/api-service"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,11 +20,16 @@ export default function RegisterPage() {
     username: "",
     email: "",
     mobile: "",
-    region: "north",
+    region: "",
     password: "",
     confirmPassword: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState({
+    password: false,
+    confirmPassword: false,
+  });
   const router = useRouter()
   const { toast } = useToast()
 
@@ -34,50 +40,70 @@ export default function RegisterPage() {
 
   const handleRegionChange = (value: string) => {
     setFormData((prev) => ({ ...prev, region: value }))
+
+    setErrors((prev) => {
+      if (!prev.location) return prev;
+      const { location, ...rest } = prev;
+      return rest;
+    });
   }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrors({})
 
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      })
+      console.log("Passwords don't match")
+      // toast({
+      //   title: "Passwords don't match",
+      //   description: "Please make sure your passwords match.",
+      //   variant: "destructive",
+      // })
+      return
+    }
+
+    if (formData.region ==="") {
+      setErrors((prev) => ({
+        ...prev,
+        location: "Please select a region.",
+      }));
       return
     }
 
     setIsLoading(true)
 
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      // Call the register API
+      await registerUser({
+        username: formData.username,
+        password: formData.password,
+        name: formData.name,
+        email: formData.email,
+        mobileNumber: formData.mobile,
+        location: formData.region,
       })
 
-      if (!response.ok) {
-        throw new Error("Registration failed")
-      }
-
-      // For now, we'll simulate a successful registration
-      setTimeout(() => {
-        toast({
-          title: "Registration Successful!",
-          description: "You can now log in with your credentials.",
-        })
-        router.push("/login")
-      }, 1000)
-    } catch (error) {
       toast({
-        title: "Registration Failed",
-        description: "Please try again later.",
-        variant: "destructive",
+        title: "Registration Successful!",
+        description: "You can now log in with your credentials.",
       })
+      router.push("/login")
+    } catch (error: any) {
+      console.log("error", error)
+      if (error.validationErrors) {
+        setErrors(error.validationErrors)
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: "Unexpected error occurred.",
+          variant: "destructive",
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -116,6 +142,7 @@ export default function RegisterPage() {
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
               </div>
 
               <div className="space-y-2">
@@ -129,6 +156,7 @@ export default function RegisterPage() {
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {errors.username && <p className="text-sm text-red-500">{errors.username}</p>}
               </div>
 
               <div className="space-y-2">
@@ -143,6 +171,7 @@ export default function RegisterPage() {
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
@@ -157,6 +186,7 @@ export default function RegisterPage() {
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {errors.mobileNumber && <p className="text-sm text-red-500">{errors.mobileNumber}</p>}
               </div>
 
               <div className="space-y-2">
@@ -191,6 +221,7 @@ export default function RegisterPage() {
                     </Label>
                   </div>
                 </RadioGroup>
+                {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
               </div>
 
               <div className="space-y-2">
@@ -204,6 +235,7 @@ export default function RegisterPage() {
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
@@ -214,9 +246,13 @@ export default function RegisterPage() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />
+                {touched.confirmPassword && formData.confirmPassword !== formData.password && (
+                  <p className="text-sm text-red-500">Passwords do not match</p>
+                )}
               </div>
 
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}>

@@ -5,28 +5,23 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { logoutUser } from "@/lib/api-service"
 
 export default function LogoutPage() {
   const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
-    // This would be replaced with actual API call to Spring Boot backend
+    // Log out the user
     const logout = async () => {
       try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-        })
+        logoutUser()
       } catch (error) {
         console.error("Logout error:", error)
       }
     }
 
     logout()
-
-    // Clear any client-side auth state
-    localStorage.removeItem("user")
-    sessionStorage.removeItem("user")
 
     toast({
       title: "Logged Out Successfully",
@@ -36,8 +31,7 @@ export default function LogoutPage() {
 
   const handleLoginAgain = () => {
     // Clear any client-side auth state to ensure user is logged out
-    localStorage.removeItem("user")
-    sessionStorage.removeItem("user")
+    localStorage.removeItem("auth_token")
 
     // Redirect to login page
     window.location.href = "/login"

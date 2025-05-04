@@ -11,29 +11,23 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/components/client-auth-provider"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const { login } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // In a real app, this would call an API endpoint
-      // For now, we'll just simulate a successful login by storing in localStorage
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: "user-123",
-          name: "Demo User",
-          email: email,
-        }),
-      )
+      // Call the login function from auth context
+      await login(username, password)
 
       // Show success message
       toast({
@@ -43,12 +37,12 @@ export default function LoginPage() {
 
       // Redirect after a short delay
       setTimeout(() => {
-        window.location.href = "/explore"
+        router.push("/explore")
       }, 500)
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "An unexpected error occurred. Please try again later",
         variant: "destructive",
       })
     } finally {
@@ -79,13 +73,12 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="ash.ketchum@pokemon.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  // placeholder="pokemon_master"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="border-gray-200 focus:border-blue-300"
                 />

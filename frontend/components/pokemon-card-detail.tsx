@@ -192,7 +192,7 @@ export function PokemonCardDetail({
                             const placeholder = document.createElement("div")
                             placeholder.className = "w-full aspect-square bg-gray-200 flex items-center justify-center"
                             placeholder.innerHTML = `<span class="text-xs text-gray-500">Image ${index + 1}</span>`
-                            parent.replaceChild(placeholder, target)
+                            parent.appendChild(placeholder)
                           }
                         }}
                       />

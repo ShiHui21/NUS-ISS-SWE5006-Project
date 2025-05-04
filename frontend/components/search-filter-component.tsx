@@ -207,8 +207,7 @@ export function SearchFilterComponent({
           </div>
 
           {/* Filter Options Row */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-2"> */}
-          <div className={`grid grid-cols-1 ${showRegionFilter ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-2`}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {/* Price Range */}
             {showPriceFilter && (
               <div className="flex items-center gap-2">
@@ -249,7 +248,7 @@ export function SearchFilterComponent({
                     <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className={`${showRegionFilter ? 'w-[270px]' : 'w-[250px]'} p-0`} align="start">
+                <PopoverContent className="w-[200px] p-0" align="start">
                   <div className="p-2">
                     {rarityOptions.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
@@ -281,7 +280,7 @@ export function SearchFilterComponent({
                     <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className={`${showRegionFilter ? 'w-[260px]' : 'w-[240px]'} p-0`} align="start">
+                <PopoverContent className="w-[200px] p-0" align="start">
                   <div className="p-2">
                     {conditionOptions.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
@@ -305,8 +304,7 @@ export function SearchFilterComponent({
 
             {/* Region Dropdown */}
             {showRegionFilter && (
-              // <div className="flex items-center gap-2 md:col-span-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 md:col-span-3">
                 <Label className="whitespace-nowrap w-16">Region:</Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -315,7 +313,7 @@ export function SearchFilterComponent({
                       <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[270px] p-0" align="start">
+                  <PopoverContent className="w-[200px] p-0" align="start">
                     <div className="p-2">
                       {regionOptions.map((option) => (
                         <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">

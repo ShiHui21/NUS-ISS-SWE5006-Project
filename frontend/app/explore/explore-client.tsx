@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { PokemonCard } from "@/components/pokemon-card"
 import { PokemonCardDetail } from "@/components/pokemon-card-detail"
 import { Navbar } from "@/components/navbar"
 import type { ListingType } from "@/types/listing"
 import { SearchFilterComponent, type FilterState } from "@/components/search-filter-component"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ExploreClientProps {
   initialListings: ListingType[]
@@ -25,6 +26,8 @@ export default function ExploreClient({ initialListings }: ExploreClientProps) {
     conditions: [],
     sortBy: "",
   })
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
 
   // Apply filters and sorting
   const applyFilters = (newFilters: FilterState) => {
@@ -115,7 +118,11 @@ export default function ExploreClient({ initialListings }: ExploreClientProps) {
               </h2>
             </div>
 
-            {filteredListings.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Loading cards...</p>
+              </div>
+            ) : filteredListings.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filteredListings.map((card) => (
                   <PokemonCard key={card.id} card={card} onClick={() => setSelectedCard(card)} />

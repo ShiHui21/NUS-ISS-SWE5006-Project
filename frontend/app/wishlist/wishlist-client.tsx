@@ -8,7 +8,7 @@ import { PokemonCardDetail } from "@/components/pokemon-card-detail"
 import { Navbar } from "@/components/navbar"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
-import { HeartOff } from "lucide-react"
+import { Heart } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,7 +102,7 @@ export default function WishlistClient({ initialWishlist }: WishlistClientProps)
                           handleRemoveFromWishlist(card.id)
                         }}
                       >
-                        <HeartOff className="h-5 w-5 text-red-600" />
+                        <Heart className="h-5 w-5 text-red-600" />
                         <span className="sr-only">Remove from Wishlist</span>
                       </Button>
                     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -24,13 +24,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  getUserDetails,
+  getAllListings,
+  createListing,
+  updateListing,
+  deleteListing,
+  convertToBackendListing,
+} from "@/lib/api-service"
 
 interface ProfileClientProps {
   profile: UserType
   initialListings: ListingType[]
 }
 
-export default function ProfileClient({ profile, initialListings }: ProfileClientProps) {
+export default function ProfileClient({ profile: initialProfile, initialListings }: ProfileClientProps) {
+  const [profile, setProfile] = useState<UserType>(initialProfile)
   const [activeListings, setActiveListings] = useState(initialListings.filter((listing) => !listing.sold))
   const [filteredActiveListings, setFilteredActiveListings] = useState(activeListings)
   const [soldListings, setSoldListings] = useState(initialListings.filter((listing) => listing.sold))
@@ -40,35 +49,26 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
   const [listingToEdit, setListingToEdit] = useState<ListingType | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [listingToDelete, setListingToDelete] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
+  useEffect(() => {
+    console.log(initialListings)
+  })
+  
   const handleCreateListing = async (
     newListing: Omit<ListingType, "id" | "sellerId" | "sellerName" | "sellerRegion">,
   ) => {
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...newListing,
-          sellerId: profile.id,
-          sellerName: profile.name,
-          sellerRegion: profile.region,
-        }),
-      })
+      // Convert to backend format
+      const backendListing = convertToBackendListing(newListing)
 
-      if (!response.ok) {
-        throw new Error("Failed to create listing")
-      }
+      // Create listing
+      const listingId = await createListing(backendListing)
 
-      const createdListing = await response.json()
-
-      // For now, we'll simulate a successful creation
-      const mockListing: ListingType = {
-        id: `listing-${Date.now()}`,
+      // Create a temporary listing object for the UI
+      const createdListing: ListingType = {
+        id: listingId,
         sellerId: profile.id,
         sellerName: profile.name,
         sellerRegion: profile.region,
@@ -76,7 +76,7 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
         sold: false,
       }
 
-      const newActiveListings = [...activeListings, mockListing]
+      const newActiveListings = [...activeListings, createdListing]
       setActiveListings(newActiveListings)
       applyFilters(newActiveListings)
       setIsCreateModalOpen(false)
@@ -96,18 +96,11 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
 
   const handleEditListing = async (updatedListing: ListingType) => {
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch(`/api/listings/${updatedListing.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedListing),
-      })
+      // Convert to backend format
+      const backendListing = convertToBackendListing(updatedListing)
 
-      if (!response.ok) {
-        throw new Error("Failed to update listing")
-      }
+      // Update listing
+      await updateListing(updatedListing.id, backendListing)
 
       // Update the listings in state
       const newActiveListings = activeListings.map((listing) =>
@@ -141,14 +134,8 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
     if (!listingToDelete) return
 
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch(`/api/listings/${listingToDelete}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete listing")
-      }
+      // Delete listing
+      await deleteListing(listingToDelete)
 
       // Remove the listing from state
       const newActiveListings = activeListings.filter((listing) => listing.id !== listingToDelete)
@@ -173,19 +160,17 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
 
   const handleMarkAsSold = async (listingId: string) => {
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch(`/api/listings/${listingId}/sold`, {
-        method: "PUT",
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to mark listing as sold")
-      }
-
       // Find the listing
       const listing = activeListings.find((l) => l.id === listingId)
 
       if (listing) {
+        // Update the listing status to sold
+        const updatedListing = { ...listing, sold: true }
+        const backendListing = convertToBackendListing(updatedListing)
+
+        // Update listing in backend
+        await updateListing(listingId, backendListing)
+
         // Remove from active listings
         const newActiveListings = activeListings.filter((l) => l.id !== listingId)
         setActiveListings(newActiveListings)
@@ -370,7 +355,11 @@ export default function ProfileClient({ profile, initialListings }: ProfileClien
                       </h2>
                     </div>
 
-                    {filteredActiveListings.length > 0 ? (
+                    {loading ? (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500">Loading your listings...</p>
+                      </div>
+                    ) : filteredActiveListings.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredActiveListings.map((card) => (
                           <div key={card.id} className="relative group">
