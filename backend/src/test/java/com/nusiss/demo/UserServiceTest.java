@@ -62,7 +62,7 @@ public class UserServiceTest {
         assertEquals("JohnDoe", result.getUsername());
         assertEquals("John Doe", result.getName());
         assertEquals("johndoe@gmail.com", result.getEmail());
-        assertEquals("North East Region", result.getLocation());
+        assertEquals("North East Region", result.getRegion());
         assertEquals("12345678", result.getMobileNumber());
     }
 

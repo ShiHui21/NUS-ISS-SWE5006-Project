@@ -32,6 +32,6 @@ public class GetUserDetailsDTO {
 
     public String getMobileNumber() {return this.mobileNumber; }
 
-    public String getLocation() {return this.region; }
+    public String getRegion() {return this.region; }
 
 }
