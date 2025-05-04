@@ -14,14 +14,14 @@ public class GetUserDetailsDTO {
 
     private String mobileNumber;
 
-    private String location;
+    private String region;
 
     public GetUserDetailsDTO(User user) {
         this.username = user.getUsername();
         this.name = user.getName();
         this.email = user.getEmail();
         this.mobileNumber = user.getMobileNumber();
-        this.location = user.getLocation();
+        this.region = user.getRegion().getRegionDisplayName();
     }
 
     public String getUsername() {return this.username; }
@@ -32,6 +32,6 @@ public class GetUserDetailsDTO {
 
     public String getMobileNumber() {return this.mobileNumber; }
 
-    public String getLocation() {return this.location; }
+    public String getLocation() {return this.region; }
 
 }

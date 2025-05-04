@@ -2,6 +2,7 @@ package com.nusiss.entity;
 
 import com.nusiss.enums.CardType;
 import com.nusiss.enums.CardCondition;
+import com.nusiss.enums.ListingStatus;
 import com.nusiss.enums.Rarity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -32,12 +33,13 @@ public class Listing {
     @Enumerated(EnumType.STRING)
     private Rarity rarity;
 
+    @Enumerated(EnumType.STRING)
+    private ListingStatus listingStatus;
+
     private BigDecimal price;
 
     @ElementCollection
     private List<String> images = new ArrayList<>();
-
-    private boolean isSold;
 
     private String description;
 
@@ -73,6 +75,10 @@ public class Listing {
 
     public void setRarity(Rarity rarity) { this.rarity = rarity; }
 
+    public ListingStatus getListingStatus() { return listingStatus; }
+
+    public void setListingStatus(ListingStatus listingStatus) { this.listingStatus = listingStatus; }
+
     public BigDecimal getPrice() { return price; }
 
     public void setPrice(BigDecimal price) {this.price = price; }
@@ -80,10 +86,6 @@ public class Listing {
     public List<String> getImages() { return images; }
 
     public void setImages(List<String> images) { this.images = images; }
-
-    public boolean getSoldStatus() { return isSold; }
-
-    public void setSoldStatus(boolean isSold) { this.isSold = isSold; }
 
     public String getDescription() { return description; }
 

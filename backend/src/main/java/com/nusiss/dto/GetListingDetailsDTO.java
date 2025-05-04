@@ -20,11 +20,11 @@ public class GetListingDetailsDTO {
 
     private String rarity;
 
+    private String listingStatus;
+
     private BigDecimal price;
 
     private List<String> images;
-
-    private boolean isSold;
 
     private String description;
 
@@ -39,9 +39,9 @@ public class GetListingDetailsDTO {
         this.cardCondition = listing.getCardCondition().getCardConditionDisplayName();
         this.cardType = listing.getCardType().getCardTypeDisplayName();
         this.rarity = listing.getRarity().getRarityDisplayName();
+        this.listingStatus = listing.getListingStatus().getListingStatusDisplayName();
         this.price = listing.getPrice();
         this.images = listing.getImages();
-        this.isSold = listing.getSoldStatus();
         this.description = listing.getDescription();
         this.listedOn = listing.getCreatedOn();
     }
@@ -61,7 +61,7 @@ public class GetListingDetailsDTO {
 
     public List<String> getImages() { return images; }
 
-    public boolean getSoldStatus() {return isSold; }
+    public String getListingStatus() {return listingStatus; }
 
     public String getDescription() { return description; }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nusiss.config.AuthenticateUser;
 import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
+import com.nusiss.enums.Region;
 import com.nusiss.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ public class UserControllerIntegrationTest {
         user.setEmail("existingUser@gmail.com");
         user.setName("existing Name");
         user.setMobileNumber("12345678");
-        user.setLocation("North-East");
+        user.setRegion(Region.CENTRAL_REGION);
         userRepository.save(user);
 
         AuthenticateUser authenticateUser = new AuthenticateUser(
@@ -71,7 +72,7 @@ public class UserControllerIntegrationTest {
         conflictingUser.setEmail("newUser123@gmail.com");
         conflictingUser.setName("New Name");
         conflictingUser.setMobileNumber("87654321");
-        conflictingUser.setLocation("South-West");
+        conflictingUser.setRegion(Region.NORTH_REGION);
         userRepository.save(conflictingUser);  // Save the conflicting user to DB
 
     }
@@ -84,7 +85,7 @@ public class UserControllerIntegrationTest {
         updateUserDetailsDTO.setEmail("existingUser@gmail.com");
         updateUserDetailsDTO.setName("Updated Name");
         updateUserDetailsDTO.setMobileNumber("12345678");
-        updateUserDetailsDTO.setLocation("North-East");
+        updateUserDetailsDTO.setRegion("North-East");
 
         // Perform the request
         mockMvc.perform(put("/user/update-details")

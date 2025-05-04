@@ -6,6 +6,7 @@ import com.nusiss.entity.Listing;
 import com.nusiss.entity.User;
 import com.nusiss.enums.CardCondition;
 import com.nusiss.enums.CardType;
+import com.nusiss.enums.ListingStatus;
 import com.nusiss.enums.Rarity;
 import com.nusiss.patterns.factory.ListingFactory;
 import com.nusiss.patterns.factory.PokemonCardListingFactory;
@@ -27,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -130,7 +132,7 @@ public class ListingService {
     public ResponseEntity<String> updateListingAsSold(UUID listingId) {
         Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new EntityNotFoundException("Listing not found!"));
 
-        listing.setSoldStatus(true);
+        listing.setListingStatus(ListingStatus.SOLD);
         listingRepository.save(listing);
 
 //        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
@@ -161,8 +163,10 @@ public class ListingService {
         if (!listing.getSeller().getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not allowed to delete this listing.");
         }
-        listingRepository.delete(listing);
-        return ResponseEntity.status(HttpStatus.OK).body("Listing successfully deleted");
+
+        listing.setListingStatus(ListingStatus.DELETED);
+//        listingRepository.delete(listing);
+        return ResponseEntity.status(HttpStatus.OK).body("Listing successfully soft deleted");
     }
 
 //    public GetListingsByUserDTO getListingsBySearchFilter(Map<String, String> searchCriteria) {
@@ -177,33 +181,34 @@ public class ListingService {
 //        return new GetListingsByUserDTO(userDetailsDTO.getUsername(), userDetailsDTO.getLocation(), listingSummariesDTOs);
 //    }
 
-    public GetListingsDTO getListings(Map<String, String> params, UUID userId, boolean excludeCurrentUser, int page, int size) {
+    public GetListingsDTO getListings(@RequestBody GetListingFilterDTO filter, UUID userId) {
 
         List<SearchStrategy> strategies = new ArrayList<>();
 
-        if (params.containsKey("username")) {
+        if (filter.getUsername() != null) {
             strategies.add(new UsernameSearchStrategy());
         }
 
-        if (params.containsKey("minPrice") || params.containsKey("maxPrice") ||
-                params.containsKey("condition") || params.containsKey("isSold") || params.containsKey("rarity")) {
+        if (filter.getMinPrice() != null || filter.getMaxPrice() != null ||
+                filter.getConditions() != null || filter.getListingStatuses() != null ||
+                filter.getRarities() != null || filter.getRegions() != null || filter.getTitle() != null) {
             strategies.add(new FilterSearchStrategy());
         }
 
-        strategies.add(new UserExclusionStrategy(userId, excludeCurrentUser));
+        strategies.add(new UserExclusionStrategy(userId, filter.isExcludeCurrentUser()));
 
         Specification<Listing> spec = Specification.where(null);
         for (SearchStrategy strategy : strategies) {
-            Specification<Listing> strategySpec = strategy.searchSpecifications(params);
+            Specification<Listing> strategySpec = strategy.searchSpecifications(filter);
             if (strategySpec != null) {
                 spec = spec.and(strategySpec);
             }
         }
 
-        String sortBy = params.getOrDefault("sortBy", "createdOn");
-        String sortOrder = params.getOrDefault("sortOrder", "asc");
-        int currPage = Integer.parseInt(params.getOrDefault("page", "0"));
-        int currSize = Integer.parseInt(params.getOrDefault("size", "100"));
+        String sortBy = filter.getSortBy() != null ? filter.getSortBy() :"createdOn";
+        String sortOrder = filter.getSortOrder() != null ? filter.getSortOrder() : "asc";
+        int currPage = Integer.parseInt(filter.getPage() != null ? filter.getPage() : "0");
+        int currSize = Integer.parseInt(filter.getSize() != null ? filter.getSize() : "100");
         Sort sort = createSort(sortBy, sortOrder);
 
         PageRequest pageRequest = PageRequest.of(currPage, currSize, sort);
@@ -240,15 +245,21 @@ public class ListingService {
 
     private Sort createSort(String sortBy, String sortOrder) {
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "createdOn"; // Default to sorting by createdDate
+            sortBy = "createdOn"; // Default
         }
 
-        if (sortOrder == null || sortOrder.equalsIgnoreCase("asc")) {
-            return sortBy.equalsIgnoreCase("price") ? Sort.by(Sort.Order.asc("price"))
-                    : Sort.by(Sort.Order.asc("createdOn"));
-        } else {
-            return sortBy.equalsIgnoreCase("price") ? Sort.by(Sort.Order.desc("price"))
-                    : Sort.by(Sort.Order.desc("createdOn"));
+        if (sortOrder == null || sortOrder.isEmpty()) {
+            sortOrder = "asc";
         }
+
+        boolean ascending = sortOrder.equalsIgnoreCase("asc");
+        String sortField = switch (sortBy.toLowerCase()) {
+            case "price" -> "price";
+            case "rarity" -> "rarity";
+            case "condition" -> "condition";
+            default -> "createdOn";
+        };
+
+        return ascending ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
     }
 }

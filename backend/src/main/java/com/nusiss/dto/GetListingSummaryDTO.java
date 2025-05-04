@@ -1,6 +1,7 @@
 package com.nusiss.dto;
 
 import com.nusiss.entity.Listing;
+import com.nusiss.enums.ListingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +22,8 @@ public class GetListingSummaryDTO {
 
     private String rarity;
 
+    private String listingStatus;
+
     private BigDecimal price;
 
     private String mainImage;
@@ -30,8 +33,6 @@ public class GetListingSummaryDTO {
     private LocalDateTime listedOn;
 
     private String description;
-
-    private boolean isSold;
 
 
     public GetListingSummaryDTO(Listing listing) {
@@ -45,12 +46,13 @@ public class GetListingSummaryDTO {
         this.cardCondition = listing.getCardCondition().getCardConditionDisplayName();
         this.rarity = listing.getRarity().getRarityDisplayName();
         this.cardType = listing.getCardType().getCardTypeDisplayName();
+        this.listingStatus = listing.getListingStatus().getListingStatusDisplayName();
         this.price = listing.getPrice();
         this.mainImage = listing.getImages().isEmpty() ? null : listing.getImages().get(0);
         this.images = listing.getImages().isEmpty() ? null : listing.getImages();
         this.listedOn = listing.getCreatedOn();
         this.description = listing.getDescription();
-        this.isSold = listing.getSoldStatus();
+
         this.username = listing.getSeller().getUsername();
     }
 
@@ -84,7 +86,7 @@ public class GetListingSummaryDTO {
 
     public List<String> getImages() { return images; }
 
-    public boolean getSoldStatus() {return isSold; }
+    public String getListingStatus() {return listingStatus; }
 
     public String getDescription() { return description; }
 

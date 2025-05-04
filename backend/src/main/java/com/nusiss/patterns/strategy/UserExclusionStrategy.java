@@ -1,5 +1,6 @@
 package com.nusiss.patterns.strategy;
 
+import com.nusiss.dto.GetListingFilterDTO;
 import com.nusiss.entity.Listing;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -17,7 +18,7 @@ public class UserExclusionStrategy implements SearchStrategy {
     }
 
     @Override
-    public Specification<Listing> searchSpecifications(Map<String, String> params) {
+    public Specification<Listing> searchSpecifications(GetListingFilterDTO getListingFilterDTO) {
         if(excludeUser && userId != null) {
             return (root, query, builder) -> builder.notEqual(root.get("seller").get("id"), userId);
         }
