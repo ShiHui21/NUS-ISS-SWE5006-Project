@@ -1,10 +1,13 @@
 package com.nusiss.service;
 
+import com.nusiss.dto.CreateUserDTO;
 import com.nusiss.entity.User;
 import com.nusiss.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -45,5 +48,27 @@ public class ValidationService {
     public boolean isPasswordValid(String password) {
         String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d])(?!.*\\s).{8,}$";
         return password != null && password.matches(passwordRegex);
+    }
+
+     public Map<String, String> validateUserInput(CreateUserDTO createUserDTO) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (!isUsernameValid(createUserDTO.getUsername())) {
+            errors.put("username", "Username must be 6–30 characters and contain only letters, numbers, and underscores.");
+        } else if (isUsernameTaken(createUserDTO.getUsername())) {
+            errors.put("username", "Username is already in use.");
+        }
+
+        if (!isEmailValid(createUserDTO.getEmail())) {
+            errors.put("email", "Invalid email format.");
+        } else if (isEmailTaken(createUserDTO.getEmail())) {
+            errors.put("email", "Email is already in use.");
+        }
+
+        if (!isPasswordValid(createUserDTO.getPassword())) {
+            errors.put("password", "Password must be at least 8 characters long, include a letter, number, and symbol.");
+        }
+
+        return errors;
     }
 }
