@@ -73,30 +73,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
 
-        // authenticationManager.authenticate(
-        //         new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
-        // );
-
-        // final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
-        // String token = jwtUtil.generateToken(userDetails.getUsername());
-
-        // Map<String, String> response = new HashMap<>();
-        // response.put("token", token);
-
-        // return ResponseEntity.ok(response);
         try {
             authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
+                new UsernamePasswordAuthenticationToken(loginDTO.getIdentifier(), loginDTO.getPassword())
             );
 
             final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getIdentifier());
             String token = jwtUtil.generateToken(userDetails.getUsername());
 
-//        // After login, trigger the WebSocket connection for notifications
-//        WebSocketSession session = getWebSocketSession(userDetails.getUsername());
-//        if (session != null && session.isOpen()) {
-//            // Handle notifications for the logged-in user here
-//        }
+            // // After login, trigger the WebSocket connection for notifications
+            // WebSocketSession session = getWebSocketSession(userDetails.getUsername());
+            // if (session != null && session.isOpen()) {
+            //     // Handle notifications for the logged-in user here
+            // }
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);

@@ -29,14 +29,14 @@ const authHeaders = (): HeadersInit => {
 }
 
 // Auth API
-export const loginUser = async (username: string, password: string): Promise<string> => {
+export const loginUser = async (identifier: string, password: string): Promise<string> => {
   try {
     const response = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ identifier, password }),
     })
 
     if (!response.ok) {
