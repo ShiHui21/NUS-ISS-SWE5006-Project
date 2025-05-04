@@ -1,6 +1,7 @@
 package com.nusiss.service;
 
 import com.nusiss.dto.*;
+import com.nusiss.entity.CartItem;
 import com.nusiss.entity.Listing;
 import com.nusiss.entity.User;
 import com.nusiss.enums.CardCondition;
@@ -13,10 +14,12 @@ import com.nusiss.patterns.strategy.FilterSearchStrategy;
 import com.nusiss.patterns.strategy.SearchStrategy;
 import com.nusiss.patterns.strategy.UserExclusionStrategy;
 import com.nusiss.patterns.strategy.UsernameSearchStrategy;
+import com.nusiss.repository.CartItemRepository;
 import com.nusiss.repository.ListingRepository;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.util.ChangeTrackerUtil;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +36,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ListingService {
 
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
+    private final CartItemRepository cartItemRepository;
+    private final NotificationService notificationService;
 
-    public ListingService(UserRepository userRepository, ListingRepository listingRepository) {
+    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository) {
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.notificationService = notificationService;
     }
 
     public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO) {
@@ -118,6 +127,34 @@ public class ListingService {
 
     }
 
+    public ResponseEntity<String> updateListingAsSold(UUID listingId) {
+        Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new EntityNotFoundException("Listing not found!"));
+
+        listing.setSoldStatus(true);
+        listingRepository.save(listing);
+
+//        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
+//
+//        for (CartItem cartItem : cartItems) {
+//            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
+//
+//            try {
+//                // Try real-time notification
+//                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+//            } catch (IOException e) {
+//                // WebSocket is closed or user is offline
+//                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+//            }
+//
+//            // Mark the cart item as notified
+//            cartItem.setNotifiedStatus();
+//            cartItemRepository.save(cartItem);
+//        }
+
+        return ResponseEntity.ok("Listing marked as sold");
+    }
+
+
     public ResponseEntity<String> deleteListing(UUID listingId, UUID id) {
         Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new EntityNotFoundException("Listing not found"));
 
@@ -149,7 +186,7 @@ public class ListingService {
         }
 
         if (params.containsKey("minPrice") || params.containsKey("maxPrice") ||
-                params.containsKey("condition") || params.containsKey("listingStatus")) {
+                params.containsKey("condition") || params.containsKey("isSold") || params.containsKey("rarity")) {
             strategies.add(new FilterSearchStrategy());
         }
 
@@ -166,7 +203,7 @@ public class ListingService {
         String sortBy = params.getOrDefault("sortBy", "createdOn");
         String sortOrder = params.getOrDefault("sortOrder", "asc");
         int currPage = Integer.parseInt(params.getOrDefault("page", "0"));
-        int currSize = Integer.parseInt(params.getOrDefault("size", "10"));
+        int currSize = Integer.parseInt(params.getOrDefault("size", "100"));
         Sort sort = createSort(sortBy, sortOrder);
 
         PageRequest pageRequest = PageRequest.of(currPage, currSize, sort);

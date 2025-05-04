@@ -4,23 +4,35 @@ import com.nusiss.entity.Listing;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class GetListingSummaryDTO {
 
     private UUID id;
 
+    private String username;
+
     private String listingTitle;
 
     private String cardCondition;
+
+    private String cardType;
+
+    private String rarity;
 
     private BigDecimal price;
 
     private String mainImage;
 
+    private List<String> images;
+
     private LocalDateTime listedOn;
 
-    private String username;
+    private String description;
+
+    private boolean isSold;
+
 
     public GetListingSummaryDTO(Listing listing) {
 
@@ -31,14 +43,23 @@ public class GetListingSummaryDTO {
         this.id = listing.getId();
         this.listingTitle = listing.getListingTitle();
         this.cardCondition = listing.getCardCondition().getCardConditionDisplayName();
+        this.rarity = listing.getRarity().getRarityDisplayName();
+        this.cardType = listing.getCardType().getCardTypeDisplayName();
         this.price = listing.getPrice();
         this.mainImage = listing.getImages().isEmpty() ? null : listing.getImages().get(0);
+        this.images = listing.getImages().isEmpty() ? null : listing.getImages();
         this.listedOn = listing.getCreatedOn();
+        this.description = listing.getDescription();
+        this.isSold = listing.getSoldStatus();
         this.username = listing.getSeller().getUsername();
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public String getListingTitle() {
@@ -49,6 +70,10 @@ public class GetListingSummaryDTO {
         return cardCondition;
     }
 
+    public String getCardType() { return cardType; }
+
+    public String getRarity() { return rarity; }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -57,9 +82,11 @@ public class GetListingSummaryDTO {
         return mainImage;
     }
 
-    public LocalDateTime getListedOn() { return listedOn; }
+    public List<String> getImages() { return images; }
 
-    public String getUsername() {
-        return username;
-    }
+    public boolean getSoldStatus() {return isSold; }
+
+    public String getDescription() { return description; }
+
+    public LocalDateTime getListedOn() { return listedOn; }
 }

@@ -23,7 +23,11 @@ public class CartItem {
 
     private LocalDateTime addedAt;
 
-    private boolean notified; // for SNS: true if user was notified when listing is sold
+    private boolean isNotified; // for SNS: true if user was notified when listing is sold
+
+    public boolean getNotifiedStatus() { return this.isNotified; }
+
+    public void setNotifiedStatus() { this.isNotified = true; }
 
     public Listing getListing() {
         return listing;

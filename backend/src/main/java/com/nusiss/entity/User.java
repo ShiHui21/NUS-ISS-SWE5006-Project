@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-
 public class User {
     @Id
     @JdbcTypeCode(SqlTypes.CHAR)

@@ -2,12 +2,14 @@ package com.nusiss.service;
 
 import com.nusiss.entity.User;
 import com.nusiss.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ValidationService {
 
     @Autowired

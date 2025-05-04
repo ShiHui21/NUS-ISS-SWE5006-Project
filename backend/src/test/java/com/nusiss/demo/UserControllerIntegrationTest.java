@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -29,18 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 public class UserControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private AuthenticateUser authenticateUser;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
     @BeforeEach
@@ -78,7 +77,6 @@ public class UserControllerIntegrationTest {
     }
 
     @Test// Mocking the logged-in user
-    @WithMockUser(username = "existingUsername")
     void updateUser_withDuplicateUsername() throws Exception {
         // Prepare the data to update the user
         UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();

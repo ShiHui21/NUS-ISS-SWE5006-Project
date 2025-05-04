@@ -37,7 +37,7 @@ public class Listing {
     @ElementCollection
     private List<String> images = new ArrayList<>();
 
-    private String status;
+    private boolean isSold;
 
     private String description;
 
@@ -81,9 +81,9 @@ public class Listing {
 
     public void setImages(List<String> images) { this.images = images; }
 
-    public String getStatus() { return status; }
+    public boolean getSoldStatus() { return isSold; }
 
-    public void setStatus(String status) { this.status = status; }
+    public void setSoldStatus(boolean isSold) { this.isSold = isSold; }
 
     public String getDescription() { return description; }
 

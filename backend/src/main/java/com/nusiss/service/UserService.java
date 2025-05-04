@@ -9,6 +9,7 @@ import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.util.ChangeTrackerUtil;
 import com.nusiss.util.PasswordUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -78,7 +80,7 @@ public class UserService implements UserDetailsService {
 
         if (ChangeTrackerUtil.hasChanged(user.getLocation(), updateUserDetailsDTO.getLocation())) {
             user.setLocation(updateUserDetailsDTO.getLocation());
-            changes.add("Location");
+            changes.add("Region");
         }
 
         if (!changes.isEmpty()) {
@@ -116,7 +118,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String identifier) {
         User user = userRepository.findByUsernameIgnoreCase(identifier).orElseGet(() -> {
             return userRepository.findByEmailIgnoreCase(identifier)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    .orElse(null);
         });
 
         return new AuthenticateUser(

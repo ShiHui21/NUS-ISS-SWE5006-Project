@@ -11,6 +11,8 @@ public class GetCartItemSummaryDTO {
 
     private String cardCondition;
 
+    private String rarity;
+
     private BigDecimal price;
 
     private String mainImage;
@@ -26,6 +28,8 @@ public class GetCartItemSummaryDTO {
     public String getCardCondition() {
         return cardCondition;
     }
+
+    public String getRarity() { return rarity; }
 
     public BigDecimal getPrice() {
         return price;
@@ -46,6 +50,8 @@ public class GetCartItemSummaryDTO {
     public void setCardCondition(String cardCondition) {
         this.cardCondition = cardCondition;
     }
+
+    public void setRarity(String rarity) { this.rarity = rarity; }
 
     public void setPrice(BigDecimal price) {
         this.price = price;
