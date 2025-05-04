@@ -2,6 +2,7 @@ package com.nusiss.patterns.strategy;
 
 import com.nusiss.entity.Listing;
 import com.nusiss.enums.CardCondition;
+import com.nusiss.enums.Rarity;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -16,7 +17,8 @@ public class FilterSearchStrategy implements SearchStrategy {
         BigDecimal minPrice = params.containsKey("minPrice") ? new BigDecimal(params.get("minPrice")) : null;
         BigDecimal maxPrice = params.containsKey("maxPrice") ? new BigDecimal(params.get("maxPrice")) : null;
         String condition = params.get("condition");
-        String listingStatus = params.get("listingStatus");
+        String rarity = params.get("rarity");
+        String listingStatus = params.get("isSold");
 
         // Initialize with an empty specification (i.e., always true)
         Specification<Listing> spec = Specification.where(null);
@@ -49,9 +51,29 @@ public class FilterSearchStrategy implements SearchStrategy {
             }
         }
 
+        if (rarity != null && !rarity.isEmpty()) {
+
+            String[] rarityStrings = rarity.split(",");
+            List<Rarity> rarities = new ArrayList<>();
+            for(String rare: rarityStrings) {
+                try {
+                    Rarity rarityType = Rarity.fromRarityDisplayName(rare.trim());
+                    rarities.add(rarityType);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid rarity type ignored: " + rare);
+                }
+            }
+
+            if (!rarities.isEmpty()) {
+                System.out.println("Filtering rarity: " + rarities);
+                spec = spec.and((root, query, builder) -> root.get("rarity").in(rarities));
+            }
+        }
+
         // Apply listing status filter if provided
         if (listingStatus != null) {
-            spec = spec.and((root, query, builder) -> builder.equal(root.get("listingStatus"), listingStatus));
+            Boolean status = Boolean.parseBoolean(listingStatus);
+            spec = spec.and((root, query, builder) -> builder.equal(root.get("isSold"), status));
         }
 
         return spec;

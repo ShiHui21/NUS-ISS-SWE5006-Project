@@ -89,8 +89,14 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
             );
 
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getUsername());
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getIdentifier());
             String token = jwtUtil.generateToken(userDetails.getUsername());
+
+//        // After login, trigger the WebSocket connection for notifications
+//        WebSocketSession session = getWebSocketSession(userDetails.getUsername());
+//        if (session != null && session.isOpen()) {
+//            // Handle notifications for the logged-in user here
+//        }
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);

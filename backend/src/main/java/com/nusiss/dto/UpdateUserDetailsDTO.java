@@ -33,4 +33,14 @@ public class UpdateUserDetailsDTO {
 
     public String getLocation() {return this.location; }
 
+    public void setUsername(String username) { this.username = username; }
+
+    public void setName(String name) { this.name = name; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
+
+    public void setLocation(String location) { this.location = location; }
+
 }

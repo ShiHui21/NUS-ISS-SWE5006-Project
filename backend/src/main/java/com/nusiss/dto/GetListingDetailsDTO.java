@@ -24,7 +24,7 @@ public class GetListingDetailsDTO {
 
     private List<String> images;
 
-    private String status;
+    private boolean isSold;
 
     private String description;
 
@@ -41,7 +41,7 @@ public class GetListingDetailsDTO {
         this.rarity = listing.getRarity().getRarityDisplayName();
         this.price = listing.getPrice();
         this.images = listing.getImages();
-        this.status = listing.getStatus();
+        this.isSold = listing.getSoldStatus();
         this.description = listing.getDescription();
         this.listedOn = listing.getCreatedOn();
     }
@@ -61,7 +61,7 @@ public class GetListingDetailsDTO {
 
     public List<String> getImages() { return images; }
 
-    public String getStatus() {return status; }
+    public boolean getSoldStatus() {return isSold; }
 
     public String getDescription() { return description; }
 

@@ -54,6 +54,11 @@ public class ListingController {
         return listingService.updateListing(listingId, userId, updateListingDTO);
     }
 
+    @PutMapping("/update-listing-as-sold/{id}")
+    public ResponseEntity<String> updateListingAsSold(@PathVariable("id") UUID listingId, @AuthenticationPrincipal AuthenticateUser authenticateUser) {
+        return listingService.updateListingAsSold(listingId);
+    }
+
     @DeleteMapping("/delete-listing/{id}")
     public ResponseEntity<String> deleteListing(@PathVariable("id") UUID listingId, @AuthenticationPrincipal AuthenticateUser authenticateUser) {
         UUID userId = authenticateUser.getUserId();

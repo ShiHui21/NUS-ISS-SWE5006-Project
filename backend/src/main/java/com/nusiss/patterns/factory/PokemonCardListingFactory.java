@@ -27,7 +27,7 @@ public class PokemonCardListingFactory extends ListingFactory{
         listing.setPrice(createListingDTO.getPrice()); // Total price includes platform fee
         listing.setImages(createListingDTO.getImages());
         listing.setDescription(createListingDTO.getDescription());
-        listing.setStatus("AVAILABLE");
+        listing.setSoldStatus(false);
 
         return listing;
     }
