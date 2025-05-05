@@ -20,14 +20,40 @@ public class Notification {
 
     private boolean isRead;  // Whether the notification has been read by the user
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;  // Timestamp of the notification creation
+    public Notification() {}
 
-    // Constructor and getters/setters
-    public Notification(User user, String message) {
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdOn;  // Timestamp of the notification creation
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDateTime getCreatedOn() {
+        return createdOn;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
         this.message = message;
-        this.isRead = false;  // Initially unread
-        this.createdAt = LocalDateTime.now();
     }
 }

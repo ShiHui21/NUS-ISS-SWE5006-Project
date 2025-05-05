@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -121,11 +123,13 @@ public class UserService implements UserDetailsService {
                     .orElse(null);
         });
 
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
         return new AuthenticateUser(
                 user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                new ArrayList<>() // Authorities/roles — leave empty for now
+                authorities // Authorities/roles — leave empty for now
         );
     }
 }

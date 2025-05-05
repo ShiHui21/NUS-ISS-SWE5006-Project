@@ -26,10 +26,10 @@ public class S3Service {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         try {
+            System.out.println("BucketName: " + bucketName);
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(file.getSize());
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file", e);
         }
