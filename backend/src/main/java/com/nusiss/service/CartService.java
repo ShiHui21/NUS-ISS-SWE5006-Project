@@ -2,7 +2,6 @@ package com.nusiss.service;
 
 import com.nusiss.dto.GetCartItemSummaryDTO;
 import com.nusiss.dto.GetCartItemsDTO;
-import com.nusiss.dto.GetListingSummaryDTO;
 import com.nusiss.entity.Cart;
 import com.nusiss.entity.CartItem;
 import com.nusiss.entity.Listing;

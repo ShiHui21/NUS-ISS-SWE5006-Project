@@ -4,7 +4,6 @@ import com.nusiss.entity.User;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.util.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
