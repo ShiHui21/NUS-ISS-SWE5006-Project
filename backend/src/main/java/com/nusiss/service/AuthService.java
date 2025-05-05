@@ -12,31 +12,33 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final ValidationService validationService;
+//    private final ValidationService validationService;
 
     public AuthService(UserRepository userRepository, ValidationService validationService) {
 
         this.userRepository = userRepository;
-        this.validationService = validationService;
+//        this.validationService = validationService;
     }
 
-    public ResponseEntity<String> createUser(CreateUserDTO createUserDTO) {
+    public ResponseEntity<?> createUser(CreateUserDTO createUserDTO) {
         System.out.println("Inside createUser method");
+        // Map<String, String> errors = new HashMap<>();
 
-        if(!validationService.isUsernameValid(createUserDTO.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Invalid Username. Username should be 6 - 30 characters long and should not contain any special characters except '_'");
-        }
-        if(validationService.isUsernameTaken(createUserDTO.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already in use!");
-        }
+        // if(!validationService.isUsernameValid(createUserDTO.getUsername())) {
+        //     errors.put("username", "Username must be 6–30 characters and contain only letters, numbers, and underscores.");
+        // } else if(validationService.isUsernameTaken(createUserDTO.getUsername())) {
+        //     errors.put("username", "Username is already in use.");
+        // }
 
-        if(!validationService.isEmailValid(createUserDTO.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Invalid email format!");
-        }
+        // if (!validationService.isEmailValid(createUserDTO.getEmail())) {
+        //     errors.put("email", "Invalid email format.");
+        // } else if (validationService.isEmailTaken(createUserDTO.getEmail())) {
+        //     errors.put("email", "Email is already in use.");
+        // }
 
-        if(validationService.isEmailTaken(createUserDTO.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
-        }
+        // if (!errors.isEmpty()) {
+        //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        // }
 
 //          User user = User.fromDTO(userCreateDTO);
         User user = new User();

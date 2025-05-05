@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public class GetUserDetailsDTO {
 
+    private UUID id;
     private String username;
 
     private String name;
@@ -17,11 +18,16 @@ public class GetUserDetailsDTO {
     private String region;
 
     public GetUserDetailsDTO(User user) {
+        this.id = user.getId();
         this.username = user.getUsername();
         this.name = user.getName();
         this.email = user.getEmail();
         this.mobileNumber = user.getMobileNumber();
         this.region = user.getRegion().getRegionDisplayName();
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getUsername() {return this.username; }

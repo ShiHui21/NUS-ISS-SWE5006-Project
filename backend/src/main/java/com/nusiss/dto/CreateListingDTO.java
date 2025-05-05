@@ -51,4 +51,9 @@ public class CreateListingDTO {
 
     public String getDescription() { return description; }
 
+    // Setter for images to inject the s3 url after upload
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
 }

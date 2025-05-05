@@ -7,19 +7,19 @@ public class CreateUserDTO {
     @NotBlank(message = "Username is required")
     private String username;
 
-    @NotBlank(message = "password is required")
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "name is required")
+    @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "email is required")
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @NotBlank(message = "mobileNumber is required")
+    @NotBlank(message = "Mobile Number is required")
     private String mobileNumber;
 
-    @NotBlank(message = "region is required")
+    @NotBlank(message = "Region is required")
     private String region;
 
     public String getUsername() {

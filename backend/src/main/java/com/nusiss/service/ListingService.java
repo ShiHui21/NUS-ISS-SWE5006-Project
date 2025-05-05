@@ -1,7 +1,6 @@
 package com.nusiss.service;
 
 import com.nusiss.dto.*;
-import com.nusiss.entity.CartItem;
 import com.nusiss.entity.Listing;
 import com.nusiss.entity.User;
 import com.nusiss.enums.CardCondition;
@@ -29,11 +28,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,18 +43,30 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final CartItemRepository cartItemRepository;
     private final NotificationService notificationService;
+    private final S3Service s3Service;
 
-    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository) {
+    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository, S3Service s3Service) {
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
         this.cartItemRepository = cartItemRepository;
         this.notificationService = notificationService;
+        this.s3Service = s3Service;
     }
 
-    public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO) {
-        System.out.println("Inside createUser method");
+    public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO, List<MultipartFile> imageFiles) {
+        System.out.println("Inside createListing method");
 
         User seller = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // Upload files to S3 and get URLs
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile file : imageFiles) {
+            String imageUrl = s3Service.uploadFile(file);
+            imageUrls.add(imageUrl);
+        }
+
+        // Set uploaded image URLs into the DTO
+        createListingDTO.setImages(imageUrls);
 
         ListingFactory factory = getFactoryByCardType(CardType.fromCardTypeDisplayName(createListingDTO.getCardType()));
 

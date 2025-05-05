@@ -5,12 +5,15 @@ import com.nusiss.dto.*;
 import com.nusiss.service.ListingService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,9 +27,14 @@ public class ListingController {
         this.listingService = listingService;
     }
 
-    @PostMapping("/create-listing")
-    public ResponseEntity<String> createListing(@RequestBody @Valid CreateListingDTO createListingDTO, @AuthenticationPrincipal
-    AuthenticateUser authenticateUser, BindingResult bindingResult) {
+    @PostMapping(path = "/create-listing", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createListing(
+            @RequestPart("data") @Valid CreateListingDTO createListingDTO,
+            @RequestPart("images") List<MultipartFile> imageFiles,
+            @AuthenticationPrincipal AuthenticateUser authenticateUser,
+            BindingResult bindingResult) {
+
+        System.out.println("Received create listing request");
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessages = new StringBuilder();
             for (ObjectError error : bindingResult.getAllErrors()) {
@@ -36,7 +44,7 @@ public class ListingController {
         }
         UUID userId = authenticateUser.getUserId();
 
-        return listingService.createListing(userId, createListingDTO);
+        return listingService.createListing(userId, createListingDTO, imageFiles);
     }
 
     @PutMapping("/update-listing/{id}")
