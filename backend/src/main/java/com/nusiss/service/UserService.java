@@ -123,7 +123,7 @@ public class UserService implements UserDetailsService {
                     .orElse(null);
         });
 
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = new ArrayList<>();
 
         return new AuthenticateUser(
                 user.getId(),

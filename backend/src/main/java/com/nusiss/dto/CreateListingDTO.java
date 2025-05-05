@@ -25,13 +25,12 @@ public class CreateListingDTO {
     @NotBlank(message = "Rarity is required!")
     private String rarity;
 
-    @NotEmpty(message = "At least one image URL is required")
     private List<String> images = new ArrayList<>();
 
     @NotNull(message = "Selling price for card is required!")
     private BigDecimal price;
 
-    private String status;
+    private String listingStatus;
 
     private String description;
 
@@ -47,7 +46,7 @@ public class CreateListingDTO {
 
     public BigDecimal getPrice() { return price; }
 
-    public String getStatus() {return status; }
+    public String getListingStatus() {return listingStatus; }
 
     public String getDescription() { return description; }
 

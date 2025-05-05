@@ -56,6 +56,10 @@ public class ListingService {
     public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO, List<MultipartFile> imageFiles) {
         System.out.println("Inside createListing method");
 
+        if (imageFiles.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("At least one image must be provided.");
+        }
+
         User seller = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         // Upload files to S3 and get URLs
