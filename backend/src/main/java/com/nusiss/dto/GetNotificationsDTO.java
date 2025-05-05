@@ -20,4 +20,20 @@ public class GetNotificationsDTO {
         this.createOn = notification.getCreatedOn();
         this.isRead = notification.isRead();      // Assuming Notification has isRead() method
     }
+
+    public LocalDateTime getCreateOn() {
+        return createOn;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

@@ -25,6 +25,13 @@ public class Notification {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdOn;  // Timestamp of the notification creation
 
+    @PrePersist
+    public void prePersist() {
+        if (createdOn == null) {
+            createdOn = LocalDateTime.now();
+        }
+    }
+
     public Long getId() {
         return id;
     }
