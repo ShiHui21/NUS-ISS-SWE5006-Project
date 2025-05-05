@@ -66,15 +66,12 @@ public class ListingController {
         return listingService.deleteListing(listingId, userId);
     }
 
-    @GetMapping("/get-all-listing")
-    public ResponseEntity<GetListingsDTO> getListings(@RequestParam Map<String, String> params,
-                                                      @RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "10") int size,
-                                                      @RequestParam boolean excludeUser,
+    @PostMapping("/get-all-listing")
+    public ResponseEntity<GetListingsDTO> getListings(@RequestBody GetListingFilterDTO getListingFilterDTO,
                                                       @AuthenticationPrincipal AuthenticateUser authenticateUser) {
         UUID userId = authenticateUser.getUserId();
 
-        return ResponseEntity.ok(listingService.getListings(params, userId, excludeUser, page, size));
+        return ResponseEntity.ok(listingService.getListings(getListingFilterDTO, userId));
     }
 
     @GetMapping("/get-listing-details/{id}")

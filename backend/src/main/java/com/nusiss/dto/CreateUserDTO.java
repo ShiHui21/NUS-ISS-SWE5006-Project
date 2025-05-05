@@ -19,8 +19,8 @@ public class CreateUserDTO {
     @NotBlank(message = "Mobile Number is required")
     private String mobileNumber;
 
-    @NotBlank(message = "Location is required")
-    private String location;
+    @NotBlank(message = "Region is required")
+    private String region;
 
     public String getUsername() {
         return this.username;
@@ -40,7 +40,5 @@ public class CreateUserDTO {
         return this.mobileNumber;
     }
 
-    public String getLocation() {
-        return this.location;
-    }
+    public String getRegion() { return this.region; }
 }

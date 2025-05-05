@@ -1,8 +1,11 @@
 package com.nusiss.patterns.strategy;
 
+import com.nusiss.dto.GetListingFilterDTO;
 import com.nusiss.entity.Listing;
 import com.nusiss.enums.CardCondition;
+import com.nusiss.enums.ListingStatus;
 import com.nusiss.enums.Rarity;
+import com.nusiss.enums.Region;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -13,12 +16,14 @@ import java.util.Map;
 public class FilterSearchStrategy implements SearchStrategy {
 
     @Override
-    public Specification<Listing> searchSpecifications(Map<String, String> params) {
-        BigDecimal minPrice = params.containsKey("minPrice") ? new BigDecimal(params.get("minPrice")) : null;
-        BigDecimal maxPrice = params.containsKey("maxPrice") ? new BigDecimal(params.get("maxPrice")) : null;
-        String condition = params.get("condition");
-        String rarity = params.get("rarity");
-        String listingStatus = params.get("isSold");
+    public Specification<Listing> searchSpecifications(GetListingFilterDTO getListingFilterDTO) {
+        BigDecimal minPrice = getListingFilterDTO.getMinPrice() != null ? getListingFilterDTO.getMinPrice() : null;
+        BigDecimal maxPrice = getListingFilterDTO.getMaxPrice() != null ? getListingFilterDTO.getMaxPrice() : null;
+        List<String> conditionStrings = getListingFilterDTO.getConditions();
+        List<String> rarityStrings = getListingFilterDTO.getRarities();
+        List<String> statusStrings = getListingFilterDTO.getListingStatuses();
+        List<String> regionStrings = getListingFilterDTO.getRegions();
+        String listingTitle = getListingFilterDTO.getTitle();
 
         // Initialize with an empty specification (i.e., always true)
         Specification<Listing> spec = Specification.where(null);
@@ -32,9 +37,7 @@ public class FilterSearchStrategy implements SearchStrategy {
         }
 
         // Apply condition filter if provided
-        if (condition != null && !condition.isEmpty()) {
-
-            String[] conditionStrings = condition.split(",");
+        if (conditionStrings != null && !conditionStrings.isEmpty()) {
             List<CardCondition> conditions = new ArrayList<>();
             for(String cond: conditionStrings) {
                 try {
@@ -45,15 +48,16 @@ public class FilterSearchStrategy implements SearchStrategy {
                 }
             }
 
+            // Debug log for parsed conditions
+            System.out.println("Parsed conditions: " + conditions);
+
             if (!conditions.isEmpty()) {
                 System.out.println("Filtering card conditions: " + conditions);
                 spec = spec.and((root, query, builder) -> root.get("cardCondition").in(conditions));
             }
         }
 
-        if (rarity != null && !rarity.isEmpty()) {
-
-            String[] rarityStrings = rarity.split(",");
+        if (rarityStrings != null && !rarityStrings.isEmpty()) {
             List<Rarity> rarities = new ArrayList<>();
             for(String rare: rarityStrings) {
                 try {
@@ -71,9 +75,39 @@ public class FilterSearchStrategy implements SearchStrategy {
         }
 
         // Apply listing status filter if provided
-        if (listingStatus != null) {
-            Boolean status = Boolean.parseBoolean(listingStatus);
-            spec = spec.and((root, query, builder) -> builder.equal(root.get("isSold"), status));
+        if (statusStrings != null && !statusStrings.isEmpty()) {
+            List<ListingStatus> listingStatuses = new ArrayList<>();
+            for(String state : statusStrings) {
+                try {
+                    ListingStatus listingStatus = ListingStatus.fromListingStatusDisplayName(state.trim());
+                    listingStatuses.add(listingStatus);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid status type ignored: " + state);
+                }
+            }
+
+            if (!listingStatuses.isEmpty()) {
+                System.out.println("Filtering rarity: " + listingStatuses);
+                spec = spec.and((root, query, builder) -> root.get("listingStatus").in(listingStatuses));
+            }
+        }
+
+        // Apply region filter if provided
+        if (regionStrings != null && !regionStrings.isEmpty()) {
+            List<Region> regions = new ArrayList<>();
+            for(String reg : regionStrings) {
+                try {
+                    Region regiontype = Region.fromRegionDisplayName(reg.trim());
+                    regions.add(regiontype);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid status type ignored: " + reg);
+                }
+            }
+
+            if (!regions.isEmpty()) {
+                System.out.println("Filtering rarity: " + regions);
+                spec = spec.and((root, query, builder) -> root.get("seller").get("region").in(regions));
+            }
         }
 
         return spec;

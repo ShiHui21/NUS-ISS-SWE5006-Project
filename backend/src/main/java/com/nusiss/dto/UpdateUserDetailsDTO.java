@@ -20,8 +20,8 @@ public class UpdateUserDetailsDTO {
     @NotBlank(message = "mobileNumber is required")
     private String mobileNumber;
 
-    @NotBlank(message = "location is required")
-    private String location;
+    @NotBlank(message = "region is required")
+    private String region;
 
     public String getUsername() {return this.username; }
 
@@ -31,7 +31,7 @@ public class UpdateUserDetailsDTO {
 
     public String getMobileNumber() {return this.mobileNumber; }
 
-    public String getLocation() {return this.location; }
+    public String getRegion() {return this.region; }
 
     public void setUsername(String username) { this.username = username; }
 
@@ -41,6 +41,6 @@ public class UpdateUserDetailsDTO {
 
     public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
 
-    public void setLocation(String location) { this.location = location; }
+    public void setRegion(String region) { this.region = region; }
 
 }

@@ -5,6 +5,7 @@ import com.nusiss.dto.UpdatePasswordDTO;
 import com.nusiss.dto.GetUserDetailsDTO;
 import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
+import com.nusiss.enums.Region;
 import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.util.ChangeTrackerUtil;
@@ -78,8 +79,8 @@ public class UserService implements UserDetailsService {
             changes.add("Mobile Number");
         }
 
-        if (ChangeTrackerUtil.hasChanged(user.getLocation(), updateUserDetailsDTO.getLocation())) {
-            user.setLocation(updateUserDetailsDTO.getLocation());
+        if (ChangeTrackerUtil.hasChanged(user.getRegion(), updateUserDetailsDTO.getRegion())) {
+            user.setRegion(Region.fromRegionDisplayName(updateUserDetailsDTO.getRegion()));
             changes.add("Region");
         }
 

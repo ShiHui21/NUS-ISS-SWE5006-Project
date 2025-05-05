@@ -4,6 +4,7 @@ import com.nusiss.config.AuthenticateUser;
 import com.nusiss.dto.GetUserDetailsDTO;
 import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
+import com.nusiss.enums.Region;
 import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.service.UserService;
@@ -49,7 +50,7 @@ public class UserServiceTest {
         mockUser.setName("John Doe");
         mockUser.setPassword("Password1234!");
         mockUser.setEmail("johndoe@gmail.com");
-        mockUser.setLocation("North-East");
+        mockUser.setRegion(Region.NORTH_EAST_REGION);
         mockUser.setMobileNumber("12345678");
         Mockito.when(userRepository.findById(mockUser.getId())).thenReturn(Optional.of(mockUser));
 
@@ -61,7 +62,7 @@ public class UserServiceTest {
         assertEquals("JohnDoe", result.getUsername());
         assertEquals("John Doe", result.getName());
         assertEquals("johndoe@gmail.com", result.getEmail());
-        assertEquals("North-East", result.getLocation());
+        assertEquals("North East Region", result.getRegion());
         assertEquals("12345678", result.getMobileNumber());
     }
 
@@ -87,7 +88,7 @@ public class UserServiceTest {
         final String oldEmail = "johndoe@email.com";
         final String oldName = "John Doe";
         final String oldMobile = "12345678";
-        final String oldLocation = "North-East";
+        final Region oldLocation = Region.NORTH_EAST_REGION;
 
         String newUsername = "JaneDoe";
         final String newEmail = "janedoe@email.com";
@@ -101,14 +102,14 @@ public class UserServiceTest {
         mockExistingUser.setEmail(oldEmail);
         mockExistingUser.setName(oldName);
         mockExistingUser.setMobileNumber(oldMobile);
-        mockExistingUser.setLocation(oldLocation);
+        mockExistingUser.setRegion(oldLocation);
 
         UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
         updateUserDetailsDTO.setUsername(newUsername);
         updateUserDetailsDTO.setEmail(newEmail);
         updateUserDetailsDTO.setName(newName);
         updateUserDetailsDTO.setMobileNumber(newMobile);
-        updateUserDetailsDTO.setLocation(newLocation);
+        updateUserDetailsDTO.setRegion(newLocation);
 
         // Mocks
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockExistingUser));
@@ -122,7 +123,7 @@ public class UserServiceTest {
             mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail)).thenReturn(true);
             mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldName, newName)).thenReturn(false);
             mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile)).thenReturn(false);
-            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldLocation, newLocation)).thenReturn(false);
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldLocation.getRegionDisplayName(), newLocation)).thenReturn(false);
 
             // Act
             ResponseEntity<String> response = userService.updateUser(userId, updateUserDetailsDTO);
@@ -138,7 +139,7 @@ public class UserServiceTest {
             mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail));
             mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldName, newName));
             mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile));
-            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldLocation, newLocation));
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldLocation.getRegionDisplayName(), newLocation));
         }
     }
 
@@ -151,7 +152,7 @@ public class UserServiceTest {
         final String oldEmail = "johndoe@email.com";
         final String oldName = "John Doe";
         final String oldMobile = "12345678";
-        final String oldLocation = "North-East";
+        final Region oldLocation = Region.NORTH_EAST_REGION;
 
         String newUsername = "JohnDoe";
         final String newEmail = "johndoe@email.com";
@@ -165,14 +166,14 @@ public class UserServiceTest {
         mockExistingUser.setEmail(oldEmail);
         mockExistingUser.setName(oldName);
         mockExistingUser.setMobileNumber(oldMobile);
-        mockExistingUser.setLocation(oldLocation);
+        mockExistingUser.setRegion(oldLocation);
 
         UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
         updateUserDetailsDTO.setUsername(newUsername);
         updateUserDetailsDTO.setEmail(newEmail);
         updateUserDetailsDTO.setName(newName);
         updateUserDetailsDTO.setMobileNumber(newMobile);
-        updateUserDetailsDTO.setLocation(newLocation);
+        updateUserDetailsDTO.setRegion(newLocation);
 
         Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockExistingUser));
         Mockito.when(validationService.isUsernameValid("JohnDoe")).thenReturn(true);
@@ -211,7 +212,7 @@ public class UserServiceTest {
         mockUser.setName("John Doe");
         mockUser.setPassword("Password1234!");
         mockUser.setEmail("johndoe@gmail.com");
-        mockUser.setLocation("North-East");
+        mockUser.setRegion(Region.NORTH_EAST_REGION);
         mockUser.setMobileNumber("12345678");
         Mockito.when(userRepository.findByUsernameIgnoreCase(mockUser.getUsername())).thenReturn(Optional.of(mockUser));
 

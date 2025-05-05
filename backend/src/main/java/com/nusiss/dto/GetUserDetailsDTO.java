@@ -15,7 +15,7 @@ public class GetUserDetailsDTO {
 
     private String mobileNumber;
 
-    private String location;
+    private String region;
 
     public GetUserDetailsDTO(User user) {
         this.id = user.getId();
@@ -23,7 +23,7 @@ public class GetUserDetailsDTO {
         this.name = user.getName();
         this.email = user.getEmail();
         this.mobileNumber = user.getMobileNumber();
-        this.location = user.getLocation();
+        this.region = user.getRegion().getRegionDisplayName();
     }
 
     public UUID getId() {
@@ -38,6 +38,6 @@ public class GetUserDetailsDTO {
 
     public String getMobileNumber() {return this.mobileNumber; }
 
-    public String getLocation() {return this.location; }
+    public String getRegion() {return this.region; }
 
 }

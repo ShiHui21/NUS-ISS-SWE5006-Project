@@ -1,5 +1,6 @@
 package com.nusiss.entity;
 
+import com.nusiss.enums.Region;
 import com.nusiss.util.PasswordUtil;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -20,7 +21,9 @@ public class User {
     private String name;
     private String email;
     private String mobileNumber;
-    private String location;
+
+    @Enumerated(EnumType.STRING)
+    private Region region;
 
     @Version
     private int version;
@@ -65,13 +68,9 @@ public class User {
         return this.email;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public void setRegion(Region region) { this.region = region; }
 
-    public String getLocation() {
-        return this.location;
-    }
+    public Region getRegion() { return this.region; }
 
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;

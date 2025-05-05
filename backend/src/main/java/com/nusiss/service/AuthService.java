@@ -2,6 +2,7 @@ package com.nusiss.service;
 
 import com.nusiss.dto.CreateUserDTO;
 import com.nusiss.entity.User;
+import com.nusiss.enums.Region;
 import com.nusiss.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class AuthService {
         user.setName(createUserDTO.getName());
         user.setEmail(createUserDTO.getEmail());
         user.setMobileNumber(createUserDTO.getMobileNumber());
-        user.setLocation(createUserDTO.getLocation());
+        user.setRegion(Region.fromRegionDisplayName(createUserDTO.getRegion()));
 
         userRepository.save(user);
         System.out.println("User created successfully");
