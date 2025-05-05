@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
 
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
@@ -77,70 +77,74 @@ public class UserServiceTest {
         System.out.println("Exception message: " + exception.getMessage());
     }
 
-//    @Test
-//    public void testUpdateUser_SuccessfulUpdate() {
-//        // Arrange
-//        UUID userId = UUID.randomUUID();
-//
-//        // Freeze original values before updateUser mutates them
-//        String oldUsername = "JohnDoe";
-//        final String oldEmail = "johndoe@email.com";
-//        final String oldName = "John Doe";
-//        final String oldMobile = "12345678";
-//        final Region oldLocation = Region.NORTH_EAST_REGION;
-//
-//        String newUsername = "JaneDoe";
-//        final String newEmail = "janedoe@email.com";
-//        final String newName = "John Doe"; // same
-//        final String newMobile = "12345678"; // same
-//        final String newLocation = "North-East"; // same
-//
-//        User mockExistingUser = new User();
-//        mockExistingUser.setId(userId);
-//        mockExistingUser.setUsername(oldUsername);
-//        mockExistingUser.setEmail(oldEmail);
-//        mockExistingUser.setName(oldName);
-//        mockExistingUser.setMobileNumber(oldMobile);
-//        mockExistingUser.setRegion(oldLocation);
-//
-//        UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
-//        updateUserDetailsDTO.setUsername(newUsername);
-//        updateUserDetailsDTO.setEmail(newEmail);
-//        updateUserDetailsDTO.setName(newName);
-//        updateUserDetailsDTO.setMobileNumber(newMobile);
-//        updateUserDetailsDTO.setRegion(newLocation);
-//
-//        // Mocks
-//        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockExistingUser));
-//        Mockito.when(validationService.isEmailTaken(newEmail)).thenReturn(false);
-//        Mockito.when(validationService.isUsernameTaken(newUsername)).thenReturn(false);
-//        Mockito.when(validationService.isEmailValid(newEmail)).thenReturn(true);
-//        Mockito.when(validationService.isUsernameValid(newUsername)).thenReturn(true);
-//
-//        try (MockedStatic<ChangeTrackerUtil> mockedChangeTracker = Mockito.mockStatic(ChangeTrackerUtil.class)) {
-//            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldUsername, newUsername)).thenReturn(true);
-//            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail)).thenReturn(true);
-//            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldName, newName)).thenReturn(false);
-//            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile)).thenReturn(false);
-//            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldLocation.getRegionDisplayName(), newLocation)).thenReturn(false);
-//
-//            // Act
-//            ResponseEntity<String> response = userService.updateUser(userId, updateUserDetailsDTO);
-//
-//            // Assert
-//            assertEquals(HttpStatus.OK, response.getStatusCode());
-//            assertTrue(response.getBody().contains("User updated successfully"));
-//            assertTrue(response.getBody().contains("Username"));
-//            assertTrue(response.getBody().contains("Email"));
-//
-//            // Verify
-//            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldUsername, newUsername));
-//            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail));
-//            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldName, newName));
-//            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile));
-//            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldLocation.getRegionDisplayName(), newLocation));
-//        }
-//    }
+    @Test
+    public void testUpdateUser_SuccessfulUpdate() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+
+        // Freeze original values before updateUser mutates them
+        String oldUsername = "JohnDoe";
+        final String oldEmail = "johndoe@email.com";
+        final String oldName = "John Doe";
+        final String oldMobile = "12345678";
+        final Region oldLocation = Region.NORTH_EAST_REGION;
+        final String oldLocationString = oldLocation.getRegionDisplayName();
+
+        String newUsername = "JaneDoe";
+        final String newEmail = "janedoe@email.com";
+        final String newName = "John Doe"; // same
+        final String newMobile = "12345678"; // same
+        final String newLocation = "North-East Region"; // same
+
+        User mockExistingUser = new User();
+        mockExistingUser.setId(userId);
+        mockExistingUser.setUsername(oldUsername);
+        mockExistingUser.setEmail(oldEmail);
+        mockExistingUser.setName(oldName);
+        mockExistingUser.setMobileNumber(oldMobile);
+        mockExistingUser.setRegion(oldLocation);
+
+        UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
+        updateUserDetailsDTO.setUsername(newUsername);
+        updateUserDetailsDTO.setEmail(newEmail);
+        updateUserDetailsDTO.setName(newName);
+        updateUserDetailsDTO.setMobileNumber(newMobile);
+        updateUserDetailsDTO.setRegion(newLocation);
+
+        // Mocks
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(mockExistingUser));
+        Mockito.when(validationService.isEmailTaken(newEmail)).thenReturn(false);
+        Mockito.when(validationService.isUsernameTaken(newUsername)).thenReturn(false);
+        Mockito.when(validationService.isEmailValid(newEmail)).thenReturn(true);
+        Mockito.when(validationService.isUsernameValid(newUsername)).thenReturn(true);
+
+        try (MockedStatic<ChangeTrackerUtil> mockedChangeTracker = Mockito.mockStatic(ChangeTrackerUtil.class)) {
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldUsername, newUsername)).thenReturn(true);
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail)).thenReturn(true);
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldName, newName)).thenReturn(false);
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile)).thenReturn(false);
+            mockedChangeTracker.when(() -> ChangeTrackerUtil.hasChanged(oldLocation, newLocation)).thenReturn(false);
+
+            // Act
+            ResponseEntity<String> response = userService.updateUser(userId, updateUserDetailsDTO);
+
+            // Assert
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertTrue(response.getBody().contains("User updated successfully"));
+            assertTrue(response.getBody().contains("Username"));
+            assertTrue(response.getBody().contains("Email"));
+
+            // Verify
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldUsername, newUsername));
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldEmail, newEmail));
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldName, newName));
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldMobile, newMobile));
+            mockedChangeTracker.verify(() -> ChangeTrackerUtil.hasChanged(oldLocation, newLocation));
+
+            // Optional: Verify no other interactions occurred
+            mockedChangeTracker.verifyNoMoreInteractions();
+        }
+    }
 
     @Test
     public void testUpdateUser_NoChangesMade() {
@@ -157,7 +161,7 @@ public class UserServiceTest {
         final String newEmail = "johndoe@email.com";
         final String newName = "John Doe";
         final String newMobile = "12345678";
-        final String newLocation = "North-East";
+        final String newLocation = "North-East Region";
 
         User mockExistingUser = new User();
         mockExistingUser.setId(userId);

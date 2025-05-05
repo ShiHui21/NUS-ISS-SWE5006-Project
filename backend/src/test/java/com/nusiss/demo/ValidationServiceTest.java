@@ -11,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class ValidationServiceTest {
 

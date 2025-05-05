@@ -2,11 +2,13 @@ package com.nusiss.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nusiss.config.AuthenticateUser;
+import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
 import com.nusiss.enums.Region;
 import com.nusiss.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,12 +23,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
 public class UserControllerIntegrationTest {
 
     @Autowired
@@ -35,7 +38,7 @@ public class UserControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
     @BeforeEach
@@ -72,21 +75,22 @@ public class UserControllerIntegrationTest {
 
     }
 
-//    @Test// Mocking the logged-in user
-//    void updateUser_withDuplicateUsername() throws Exception {
-//        // Prepare the data to update the user
-//        UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
-//        updateUserDetailsDTO.setUsername("newUsername123");  // Duplicate username
-//        updateUserDetailsDTO.setEmail("existingUser@gmail.com");
-//        updateUserDetailsDTO.setName("Updated Name");
-//        updateUserDetailsDTO.setMobileNumber("12345678");
-//        updateUserDetailsDTO.setRegion("North-East");
-//
-//        // Perform the request
-//        mockMvc.perform(put("/user/update-details")
-//                        .contentType("application/json")
-//                        .content(objectMapper.writeValueAsString(updateUserDetailsDTO)))
-//                .andExpect(status().isConflict())  // Expecting 409 Conflict for duplicate username
-//                .andExpect(content().string("Username is already in use!"));  // Expecting error message for duplicate username
-//    }
+    @Test
+// Mocking the logged-in user
+    void updateUser_withDuplicateUsername() throws Exception {
+        // Prepare the data to update the user
+        UpdateUserDetailsDTO updateUserDetailsDTO = new UpdateUserDetailsDTO();
+        updateUserDetailsDTO.setUsername("newUsername123");  // Duplicate username
+        updateUserDetailsDTO.setEmail("existingUser@gmail.com");
+        updateUserDetailsDTO.setName("Updated Name");
+        updateUserDetailsDTO.setMobileNumber("12345678");
+        updateUserDetailsDTO.setRegion("North-East");
+
+        // Perform the request
+        mockMvc.perform(put("/user/update-details")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(updateUserDetailsDTO)))
+                .andExpect(status().isConflict())  // Expecting 409 Conflict for duplicate username
+                .andExpect(content().string("Username is already in use!"));  // Expecting error message for duplicate username
+    }
 }
