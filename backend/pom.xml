@@ -92,7 +92,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>2.1.214</version> <!-- Use the latest version -->
+			<version>2.2.220</version> <!-- Use the latest version -->
 			<scope>runtime</scope>
 		</dependency>
 		<!-- Hibernate Validator (compatible with Jakarta Validation) -->

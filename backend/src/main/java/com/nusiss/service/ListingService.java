@@ -1,6 +1,7 @@
 package com.nusiss.service;
 
 import com.nusiss.dto.*;
+import com.nusiss.entity.CartItem;
 import com.nusiss.entity.Listing;
 import com.nusiss.entity.User;
 import com.nusiss.enums.CardCondition;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,6 +57,10 @@ public class ListingService {
 
     public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO, List<MultipartFile> imageFiles) {
         System.out.println("Inside createListing method");
+
+        if (imageFiles.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("At least one image must be provided.");
+        }
 
         User seller = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -145,23 +151,25 @@ public class ListingService {
         listing.setListingStatus(ListingStatus.SOLD);
         listingRepository.save(listing);
 
-//        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
-//
-//        for (CartItem cartItem : cartItems) {
-//            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
-//
-//            try {
-//                // Try real-time notification
-//                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-//            } catch (IOException e) {
-//                // WebSocket is closed or user is offline
-//                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-//            }
-//
-//            // Mark the cart item as notified
-//            cartItem.setNotifiedStatus();
-//            cartItemRepository.save(cartItem);
-//        }
+        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
+
+        for (CartItem cartItem : cartItems) {
+            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
+
+
+            try {
+                // Try real-time notification
+                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+            } catch (IOException e) {
+                // WebSocket is closed or user is offline
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+            }
+
+            // Mark the cart item as notified
+            cartItem.setNotifiedStatus();
+            cartItemRepository.save(cartItem);
+        }
 
         return ResponseEntity.ok("Listing marked as sold");
     }

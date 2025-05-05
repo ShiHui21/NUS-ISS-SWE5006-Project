@@ -9,12 +9,15 @@ import com.nusiss.entity.User;
 import com.nusiss.repository.NotificationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,8 +41,8 @@ public class NotificationService {
         notificationRepository.save(notification);  // Save to the database
     }
 
-    public List<GetNotificationsDTO> getNotifications(User user) {
-        List<Notification> notifications = notificationRepository.findAllByUser_Id(user.getId());
+    public List<GetNotificationsDTO> getNotifications(UUID userId) {
+        List<Notification> notifications = notificationRepository.findAllByUser_Id(userId);
 
         return notifications.stream()
                 .filter(notification -> !notification.isRead()) // Only keep unread notifications
@@ -47,10 +50,17 @@ public class NotificationService {
                 .collect(Collectors.toList()); // Collect into a List<GetNotificationsDTO>
     }
 
-    public void deleteNotification(Long id) {
+    public ResponseEntity<Map<String, String>> markNotificationAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
-        notificationRepository.delete(notification);
+
+        notification.setRead(true);
+
+        Map<String, String> response = new HashMap<>();
+        String message = "Notification marked as read";
+        response.put("message", message);
+
+        return ResponseEntity.ok(response);
     }
 
     // Send real-time notification to an online user
