@@ -29,19 +29,11 @@ public class ListingController {
 
     @PostMapping(path = "/create-listing", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createListing(
-            @RequestPart("data") @Valid CreateListingDTO createListingDTO,
+            @RequestPart("data") CreateListingDTO createListingDTO,
             @RequestPart("images") List<MultipartFile> imageFiles,
-            @AuthenticationPrincipal AuthenticateUser authenticateUser,
-            BindingResult bindingResult) {
+            @AuthenticationPrincipal AuthenticateUser authenticateUser) {
 
         System.out.println("Received create listing request");
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMessages = new StringBuilder();
-            for (ObjectError error : bindingResult.getAllErrors()) {
-                errorMessages.append(error.getDefaultMessage()).append(" ");
-            }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
-        }
         UUID userId = authenticateUser.getUserId();
 
         return listingService.createListing(userId, createListingDTO, imageFiles);

@@ -29,6 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
+        System.out.println("JWT Filter triggered for: " + request.getRequestURI());
+
         // Check if path matches the excluded paths, like /auth/**
         if (path.startsWith("/auth")) {
             filterChain.doFilter(request, response);  // Skip token validation
@@ -63,6 +65,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("SecurityContext set: " + SecurityContextHolder.getContext().getAuthentication());
             }
         }
 
