@@ -9,12 +9,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { ListingType } from "@/types/listing"
 import Image from "next/image"
 
 interface CreateListingModalProps {
   onClose: () => void
-  onSubmit: (listing: Omit<ListingType, "id" | "sellerId" | "sellerName" | "sellerRegion">) => void
+  onSubmit: (
+    listingData: {
+      title: string;
+      description: string;
+      price: number;
+      cardType: string;
+      rarity: string;
+      cardCondition: string;
+    },
+    imageFiles: File[]
+  ) => void
 }
 
 export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProps) {
@@ -22,6 +31,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
     title: "",
     description: "",
     price: "",
+    cardType: "",
     rarity: "",
     condition: "",
   })
@@ -29,6 +39,10 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
   const [mainImage, setMainImage] = useState<string | null>(null)
   const [additionalImages, setAdditionalImages] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
+
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null)
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([])
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -42,24 +56,21 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isMain = true) => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    setIsUploading(true)
-
-    // Simulate file upload - in a real app, you would upload to a server
+  
     const reader = new FileReader()
     reader.onload = () => {
       if (isMain) {
         setMainImage(reader.result as string)
+        setMainImageFile(file)
       } else {
         setAdditionalImages((prev) => [...prev, reader.result as string])
+        setAdditionalImageFiles((prev) => [...prev, file])
       }
-      setIsUploading(false)
     }
     reader.readAsDataURL(file)
-
-    // Reset the input value so the same file can be selected again if needed
     e.target.value = ""
   }
+  
 
   const removeImage = (index: number) => {
     setAdditionalImages((prev) => prev.filter((_, i) => i !== index))
@@ -73,25 +84,31 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
     e.preventDefault()
 
     const price = Number.parseFloat(formData.price)
-
-    if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price")
+    if (isNaN(price) || price <= 0 || !mainImageFile) {
+      console.error("Validation failed: Price must be a positive number and main image is required.")
       return
     }
 
-    if (!mainImage) {
-      alert("Please upload a main image")
-      return
-    }
-
-    onSubmit({
-      ...formData,
+    const listingDataPayload = {
+      title: formData.title,
+      description: formData.description,
       price,
-      imageUrl: mainImage,
-      additionalImages,
-      sold: false,
-    })
+      cardType: formData.cardType,
+      rarity: formData.rarity,
+      cardCondition: formData.condition,
+    }
+
+    const imageFiles: File[] = []
+    if (mainImageFile) {
+      imageFiles.push(mainImageFile)
+    }
+    imageFiles.push(...additionalImageFiles)
+
+    onSubmit(listingDataPayload, imageFiles)
+
+    onClose()
   }
+  
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -132,6 +149,19 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
             </div>
 
             <div className="space-y-2">
+                <Label htmlFor="cardType">Card Type</Label>
+                <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
+                  <SelectTrigger id="cardType" className="border-gray-200">
+                    <SelectValue placeholder="Select Card Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
+                    <SelectItem value="Trainer Card">Trainer Card</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+            <div className="space-y-2">
               <Label htmlFor="price">Price ($)</Label>
               <Input
                 id="price"
@@ -153,7 +183,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
               {mainImage ? (
                 <div className="relative rounded-md overflow-hidden">
                   <Image
-                    src={mainImage || "/placeholder.svg"}
+                    src={mainImage}
                     alt="Main card image"
                     width={300}
                     height={300}
@@ -242,11 +272,13 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
                     <SelectValue placeholder="Select Rarity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="common">Common</SelectItem>
-                    <SelectItem value="uncommon">Uncommon</SelectItem>
-                    <SelectItem value="rare">Rare</SelectItem>
-                    <SelectItem value="ultra-rare">Ultra Rare</SelectItem>
-                    <SelectItem value="secret-rare">Secret Rare</SelectItem>
+                    <SelectItem value="Common">Common</SelectItem>
+                    <SelectItem value="Uncommon">Uncommon</SelectItem>
+                    <SelectItem value="Rare">Rare</SelectItem>
+                    <SelectItem value="Double Rare">Double Rare</SelectItem>
+                    <SelectItem value="Illustration Rare">Illustration Rare</SelectItem>
+                    <SelectItem value="Special Illustration Rare">Special Illustration Rare</SelectItem>
+                    <SelectItem value="Hyper Rare">Hyper Rare</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -258,11 +290,12 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
                     <SelectValue placeholder="Select Condition" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="mint">Mint</SelectItem>
-                    <SelectItem value="near-mint">Near Mint</SelectItem>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="played">Played</SelectItem>
+                    <SelectItem value="Brand New">Brand New</SelectItem>
+                    <SelectItem value="Like New">Like New</SelectItem>
+                    <SelectItem value="Lightly Used">Lightly Used</SelectItem>
+                    <SelectItem value="Well Used">Well Used</SelectItem>
+                    <SelectItem value="Heavily Used">Heavily Used</SelectItem>
+                    <SelectItem value="Damage">Damage</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

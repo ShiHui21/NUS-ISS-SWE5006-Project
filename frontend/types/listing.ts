@@ -6,9 +6,10 @@ export interface ListingType {
   imageUrl: string
   additionalImages?: string[]
   rarity: string
-  condition: string
+  cardCondition: string
+  cardType: string
   sellerId: string
   sellerName: string
   sellerRegion: string
-  sold: boolean
+  listingStatus: string
 }

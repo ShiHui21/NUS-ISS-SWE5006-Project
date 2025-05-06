@@ -14,18 +14,32 @@ interface PokemonCardProps {
   isSold?: boolean
 }
 
-export function PokemonCard({ card, onClick, isSold = false }: PokemonCardProps) {
+export function PokemonCard({ card, onClick, isSold = card.listingStatus==="Sold" }: PokemonCardProps) {
   const [imageError, setImageError] = useState(false)
 
-  const rarityColors = {
-    common: "bg-gray-200 text-gray-800",
-    uncommon: "bg-green-200 text-green-800",
-    rare: "bg-blue-200 text-blue-800",
-    "ultra-rare": "bg-purple-200 text-purple-800",
-    "secret-rare": "bg-yellow-200 text-yellow-800",
+  // Updated to handle the new rarity values
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case "Common":
+        return "bg-gray-200 text-gray-800"
+      case "Uncommon":
+        return "bg-green-200 text-green-800"
+      case "Rare":
+        return "bg-blue-200 text-blue-800"
+      case "Double Rare":
+        return "bg-purple-200 text-purple-800"
+      case "Illustration Rare":
+        return "bg-pink-200 text-pink-800"
+      case "Special Illustration Rare":
+        return "bg-yellow-200 text-yellow-800"
+      case "Hyper Rare":
+        return "bg-red-200 text-red-800"
+      default:
+        return "bg-gray-200 text-gray-800"
+    }
   }
 
-  const rarityColor = rarityColors[card.rarity as keyof typeof rarityColors] || rarityColors.common
+  const rarityColor = getRarityColor(card.rarity)
 
   return (
     <motion.div
@@ -36,7 +50,7 @@ export function PokemonCard({ card, onClick, isSold = false }: PokemonCardProps)
     >
       <Card className={`overflow-hidden shadow-md transition-all duration-300 ${isSold ? "opacity-70" : ""}`}>
         <div className="relative">
-          {imageError || !card.imageUrl ? (
+          {/* {imageError || !card.imageUrl ? (
             <PlaceholderImage
               width={300}
               height={300}
@@ -45,20 +59,28 @@ export function PokemonCard({ card, onClick, isSold = false }: PokemonCardProps)
             />
           ) : (
             <Image
-              src={card.imageUrl || "/placeholder.svg"}
+              src={card.imageUrl}
               alt={card.title}
               width={300}
               height={300}
               className="w-full aspect-square object-cover"
               onError={() => setImageError(true)}
             />
-          )}
+          )} */}
+          <Image
+              src={card.imageUrl}
+              alt={card.title}
+              width={300}
+              height={300}
+              className="w-full aspect-square object-cover"
+              // onError={() => setImageError(true)}
+            />
           {isSold && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <Badge className="text-lg px-3 py-1 bg-red-500 text-white">SOLD</Badge>
             </div>
           )}
-          <Badge className={`absolute top-2 right-2 ${rarityColor}`}>{card.rarity.replace("-", " ")}</Badge>
+          <Badge className={`absolute top-2 right-2 ${rarityColor}`}>{card.rarity}</Badge>
         </div>
         <CardContent className="p-3">
           <div className="flex justify-between items-start">
