@@ -17,6 +17,8 @@ public class GetListingFilterDTO {
 
     private List<String> regions;
 
+    private List<String> cardTypes;
+
     private String title;
 
     private BigDecimal minPrice;
@@ -54,6 +56,8 @@ public class GetListingFilterDTO {
     public List<String> getRegions() {
         return regions;
     }
+
+    public List<String> getCardTypes() { return cardTypes; }
 
     public String getTitle() {
         return title;

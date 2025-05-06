@@ -2,10 +2,7 @@ package com.nusiss.patterns.strategy;
 
 import com.nusiss.dto.GetListingFilterDTO;
 import com.nusiss.entity.Listing;
-import com.nusiss.enums.CardCondition;
-import com.nusiss.enums.ListingStatus;
-import com.nusiss.enums.Rarity;
-import com.nusiss.enums.Region;
+import com.nusiss.enums.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -23,6 +20,7 @@ public class FilterSearchStrategy implements SearchStrategy {
         List<String> rarityStrings = getListingFilterDTO.getRarities();
         List<String> statusStrings = getListingFilterDTO.getListingStatuses();
         List<String> regionStrings = getListingFilterDTO.getRegions();
+        List<String> cardTypeStrings = getListingFilterDTO.getCardTypes();
 
         // Initialize with an empty specification (i.e., always true)
         Specification<Listing> spec = Specification.where(null);
@@ -86,10 +84,29 @@ public class FilterSearchStrategy implements SearchStrategy {
             }
 
             if (!listingStatuses.isEmpty()) {
-                System.out.println("Filtering rarity: " + listingStatuses);
+                System.out.println("Filtering status: " + listingStatuses);
                 spec = spec.and((root, query, builder) -> root.get("listingStatus").in(listingStatuses));
             }
         }
+
+        // Apply listing status filter if provided
+        if (cardTypeStrings != null && !cardTypeStrings.isEmpty()) {
+            List<CardType> cardTypes = new ArrayList<>();
+            for(String card : cardTypeStrings) {
+                try {
+                    CardType cardType = CardType.fromCardTypeDisplayName(card.trim());
+                    cardTypes.add(cardType);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid card type ignored: " + card);
+                }
+            }
+
+            if (!cardTypes.isEmpty()) {
+                System.out.println("Filtering card Type: " + cardTypes);
+                spec = spec.and((root, query, builder) -> root.get("cardType").in(cardTypes));
+            }
+        }
+
 
         // Apply region filter if provided
         if (regionStrings != null && !regionStrings.isEmpty()) {
