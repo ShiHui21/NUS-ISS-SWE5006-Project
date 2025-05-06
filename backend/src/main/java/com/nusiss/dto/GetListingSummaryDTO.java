@@ -34,8 +34,11 @@ public class GetListingSummaryDTO {
 
     private String description;
 
+    private String region;
 
-    public GetListingSummaryDTO(Listing listing) {
+    private boolean isInCart;
+
+    public GetListingSummaryDTO(Listing listing, boolean isInCart) {
 
         if (listing.getImages() == null || listing.getImages().isEmpty()) {
             throw new IllegalStateException("Listing must have at least one image.");
@@ -52,9 +55,11 @@ public class GetListingSummaryDTO {
         this.images = listing.getImages().isEmpty() ? null : listing.getImages();
         this.listedOn = listing.getCreatedOn();
         this.description = listing.getDescription();
-
         this.username = listing.getSeller().getUsername();
+        this.region = listing.getSeller().getRegion().getRegionDisplayName();
+        this.isInCart = isInCart;
     }
+
 
     public UUID getId() {
         return id;
@@ -90,5 +95,9 @@ public class GetListingSummaryDTO {
 
     public String getDescription() { return description; }
 
+    public String getRegion() { return region; }
+
     public LocalDateTime getListedOn() { return listedOn; }
+
+    public boolean getInCart() { return isInCart; }
 }

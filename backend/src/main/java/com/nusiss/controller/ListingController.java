@@ -63,8 +63,16 @@ public class ListingController {
     }
 
     @PutMapping("/update-listing/{id}")
-    public ResponseEntity<String> updateListing(@PathVariable("id") UUID listingId, @RequestBody @Valid UpdateListingDTO updateListingDTO, @AuthenticationPrincipal
-    AuthenticateUser authenticateUser, BindingResult bindingResult) {
+    public ResponseEntity<String> updateListing(@PathVariable("id") UUID listingId,
+                                                @RequestPart("data") String rawJson,
+                                                @RequestPart(value = "images", required = false) List<MultipartFile> newImageFiles,
+                                                @AuthenticationPrincipal AuthenticateUser authenticateUser) throws JsonProcessingException {
+
+        UpdateListingDTO updateListingDTO = objectMapper.readValue(rawJson, UpdateListingDTO.class);
+
+        BindingResult bindingResult = new BeanPropertyBindingResult(updateListingDTO, "updateListingDTO");
+        validator.validate(listingId, bindingResult);
+
         if(bindingResult.hasErrors()) {
             StringBuilder errorMessages = new StringBuilder();
             for(ObjectError objectError : bindingResult.getAllErrors()) {
@@ -72,9 +80,10 @@ public class ListingController {
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages.toString().trim());
         }
+
         UUID userId = authenticateUser.getUserId();
 
-        return listingService.updateListing(listingId, userId, updateListingDTO);
+        return listingService.updateListing(listingId, userId, updateListingDTO, newImageFiles);
     }
 
     @PutMapping("/update-listing-as-sold/{id}")

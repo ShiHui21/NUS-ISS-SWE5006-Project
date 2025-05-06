@@ -10,6 +10,7 @@ import com.nusiss.exception.UserNotFoundException;
 import com.nusiss.repository.UserRepository;
 import com.nusiss.util.ChangeTrackerUtil;
 import com.nusiss.util.PasswordUtil;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -113,6 +114,11 @@ public class UserService implements UserDetailsService {
 
     public GetUserDetailsDTO getUserByID(UUID id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return new GetUserDetailsDTO(user);
+    }
+
+    public GetUserDetailsDTO getUserByUsername(String username) {
+        User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new EntityNotFoundException(username));
         return new GetUserDetailsDTO(user);
     }
 

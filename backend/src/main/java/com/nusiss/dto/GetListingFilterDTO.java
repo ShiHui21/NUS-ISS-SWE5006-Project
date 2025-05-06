@@ -7,6 +7,8 @@ public class GetListingFilterDTO {
 
     private String username;
 
+    private String listingTitle;
+
     private List<String> conditions;
 
     private List<String> listingStatuses;
@@ -34,6 +36,8 @@ public class GetListingFilterDTO {
     public String getUsername() {
         return username;
     }
+
+    public String getListingTitle() {return listingTitle; }
 
     public List<String> getConditions() {
         return conditions;

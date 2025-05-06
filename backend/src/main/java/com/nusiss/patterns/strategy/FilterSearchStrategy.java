@@ -23,7 +23,6 @@ public class FilterSearchStrategy implements SearchStrategy {
         List<String> rarityStrings = getListingFilterDTO.getRarities();
         List<String> statusStrings = getListingFilterDTO.getListingStatuses();
         List<String> regionStrings = getListingFilterDTO.getRegions();
-        String listingTitle = getListingFilterDTO.getTitle();
 
         // Initialize with an empty specification (i.e., always true)
         Specification<Listing> spec = Specification.where(null);
