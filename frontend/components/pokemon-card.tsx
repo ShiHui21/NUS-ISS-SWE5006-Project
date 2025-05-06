@@ -11,10 +11,10 @@ import { PlaceholderImage } from "@/components/placeholder-image"
 interface PokemonCardProps {
   card: ListingType
   onClick: () => void
-  isSold?: boolean
+  isInactive?: boolean
 }
 
-export function PokemonCard({ card, onClick, isSold = card.listingStatus==="Sold" }: PokemonCardProps) {
+export function PokemonCard({ card, onClick, isInactive = card.listingStatus==="Sold" || card.listingStatus==="Deleted" }: PokemonCardProps) {
   const [imageError, setImageError] = useState(false)
 
   // Updated to handle the new rarity values
@@ -48,7 +48,7 @@ export function PokemonCard({ card, onClick, isSold = card.listingStatus==="Sold
       onClick={onClick}
       className="cursor-pointer"
     >
-      <Card className={`overflow-hidden shadow-md transition-all duration-300 ${isSold ? "opacity-70" : ""}`}>
+      <Card className={`overflow-hidden shadow-md transition-all duration-300 ${isInactive ? "opacity-70" : ""}`}>
         <div className="relative">
           {/* {imageError || !card.imageUrl ? (
             <PlaceholderImage
@@ -75,9 +75,14 @@ export function PokemonCard({ card, onClick, isSold = card.listingStatus==="Sold
               className="w-full aspect-square object-cover"
               // onError={() => setImageError(true)}
             />
-          {isSold && (
+          {card.listingStatus==="Sold" && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <Badge className="text-lg px-3 py-1 bg-red-500 text-white">SOLD</Badge>
+            </div>
+          )}
+          {card.listingStatus==="DELETED" && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <Badge className="text-lg px-3 py-1 bg-red-500 text-white">REMOVED</Badge>
             </div>
           )}
           <Badge className={`absolute top-2 right-2 ${rarityColor}`}>{card.rarity}</Badge>

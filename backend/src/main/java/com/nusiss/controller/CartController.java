@@ -34,7 +34,8 @@ public class CartController {
     @DeleteMapping("/delete-from-cart/{id}")
     public ResponseEntity<String> deleteCartItem(@PathVariable("id") UUID listingId, @AuthenticationPrincipal AuthenticateUser authenticateUser) {
         UUID userId = authenticateUser.getUserId();
-        return cartService.deleteCartItem(listingId, userId);
+        cartService.deleteCartItem(listingId, userId);
+        return ResponseEntity.ok("Removed from wishlist");
     }
 
     @GetMapping("/get-cart-items")

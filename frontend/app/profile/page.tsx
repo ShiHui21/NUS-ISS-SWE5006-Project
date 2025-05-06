@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button"
 import { PokemonCard } from "@/components/pokemon-card"
 import { PokemonCardDetail } from "@/components/pokemon-card-detail"
 import { Navbar } from "@/components/navbar"
-import { CreateListingModal } from "@/components/create-listing-modal"
-import { EditListingModal } from "@/components/edit-listing-modal"
+import { ListingFormModal } from "@/components/listing-form-modal"
 import type { UserType } from "@/types/user"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
@@ -31,7 +30,6 @@ import {
   createListing,
   updateListing,
   deleteListing,
-  convertToBackendListing,
   markAsSoldListing,
 } from "@/lib/api-service"
 
@@ -77,39 +75,39 @@ export default function ProfilePage() {
     pageSize: 100,
   })
 
-    // Initial data fetch
-    useEffect(() => {
-      const fetchProfileData = async () => {
-        setInitialLoading(true)
-        try {
-          // Check if user is authenticated
-          const token = localStorage.getItem("auth_token")
-          if (!token) {
-            router.push("/login")
-            return
-          }
-  
-          // Fetch user details
-          const userDetails = await getUserDetails()
-          setProfile(userDetails)
-  
-          // Fetch user's listings - initial fetch without filters
-          await initialFetch(userDetails)
-        } catch (error) {
-          console.error("Failed to fetch profile data:", error)
-          setError("Failed to load profile data. Please try again.")
-          toast({
-            title: "Error",
-            description: "Failed to load profile data. Please try again.",
-            variant: "destructive",
-          })
-        } finally {
-          setInitialLoading(false)
+  // Initial data fetch
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setInitialLoading(true)
+      try {
+        // Check if user is authenticated
+        const token = localStorage.getItem("auth_token")
+        if (!token) {
+          router.push("/login")
+          return
         }
+
+        // Fetch user details
+        const userDetails = await getUserDetails()
+        setProfile(userDetails)
+
+        // Fetch user's listings - initial fetch without filters
+        await initialFetch(userDetails)
+      } catch (error) {
+        console.error("Failed to fetch profile data:", error)
+        setError("Failed to load profile data. Please try again.")
+        toast({
+          title: "Error",
+          description: "Failed to load profile data. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setInitialLoading(false)
       }
-  
-      fetchProfileData()
-    }, [router, toast])
+    }
+
+    fetchProfileData()
+  }, [router, toast])
 
   const initialFetch = async (userProfile = profile) => {
     if (!userProfile) return
@@ -139,6 +137,7 @@ export default function ProfilePage() {
         currentPage: activeResult.currentPage,
         pageSize: activeResult.pageSize,
       })
+      console.log(activeResult.listings)
     } catch (error) {
       console.error("Failed to fetch initial listings:", error)
       toast({
@@ -199,16 +198,16 @@ export default function ProfilePage() {
 
   const handleCreateListing = async (
     newListingData: {
-      title: string;
-      description: string;
-      price: number;
-      cardType: string;
-      rarity: string;
-      cardCondition: string;
+      title: string
+      description: string
+      price: number
+      cardType: string
+      rarity: string
+      cardCondition: string
     },
-    imageFiles: File[]
+    imageFiles: File[],
   ) => {
-    console.log("handleCreateListing: Execution started with new data structure.");
+    console.log("handleCreateListing: Execution started with new data structure.")
     try {
       // Construct backendListing payload directly
       // No longer using convertToBackendListing for create, to directly use File objects
@@ -220,44 +219,72 @@ export default function ProfilePage() {
         rarity: newListingData.rarity,
         cardCondition: newListingData.cardCondition, // Ensure modal sends this in the correct string format
         // images: [], // API service expects this to be present and empty for create, files are separate
-      };
-      console.log("handleCreateListing: Backend payload constructed:", backendListingPayload);
-      console.log("handleCreateListing: Image files received:", imageFiles);
+      }
+      console.log("handleCreateListing: Backend payload constructed:", backendListingPayload)
+      console.log("handleCreateListing: Image files received:", imageFiles)
 
-      console.log("handleCreateListing: Calling createListing API...");
-      await createListing({...backendListingPayload, images: []}, imageFiles);
-      console.log("handleCreateListing: createListing API call finished.");
+      console.log("handleCreateListing: Calling createListing API...")
+      await createListing({ ...backendListingPayload, images: [] }, imageFiles)
+      console.log("handleCreateListing: createListing API call finished.")
 
-      console.log("handleCreateListing: Calling initialFetch...");
-      await initialFetch();
-      console.log("handleCreateListing: initialFetch call finished.");
+      console.log("handleCreateListing: Calling initialFetch...")
+      await initialFetch()
+      console.log("handleCreateListing: initialFetch call finished.")
 
-      setIsCreateModalOpen(false);
-      console.log("handleCreateListing: Create modal closed by parent.");
+      setIsCreateModalOpen(false)
+      console.log("handleCreateListing: Create modal closed by parent.")
 
       toast({
         title: "Listing Created",
         description: "Your card has been listed on the marketplace.",
-      });
-      console.log("handleCreateListing: Success toast displayed.");
+      })
+      console.log("handleCreateListing: Success toast displayed.")
     } catch (error) {
-      console.error("handleCreateListing: Error caught:", error);
+      console.error("handleCreateListing: Error caught:", error)
       toast({
         title: "Error",
         description: "Failed to create listing. Please try again.",
         variant: "destructive",
-      });
-      console.log("handleCreateListing: Error toast displayed.");
+      })
+      console.log("handleCreateListing: Error toast displayed.")
     }
-  };
+  }
 
-  const handleEditListing = async (updatedListing: ListingType) => {
+  const handleEditListing = async (
+    updatedListingData: {
+      id?: string;
+      title: string;
+      description: string;
+      price: number;
+      cardType: string;
+      rarity: string;
+      cardCondition: string;
+    },
+    imageFiles: File[],
+  ) => {
     try {
-      // Convert to backend format
-      const backendListing = convertToBackendListing(updatedListing)
+      const listingIdToUpdate = updatedListingData.id || listingToEdit?.id;
+      if (!listingIdToUpdate) {
+        throw new Error("Listing ID is required for updates");
+      }
 
-      // Update listing
-      await updateListing(updatedListing.id, backendListing)
+      // Construct the payload for the updateListing API service
+      const backendPayload = {
+        listingTitle: updatedListingData.title,
+        description: updatedListingData.description,
+        price: updatedListingData.price,
+        cardType: updatedListingData.cardType,
+        rarity: updatedListingData.rarity,
+        cardCondition: updatedListingData.cardCondition,
+        // Provide current images; backend handles new imageFiles separately
+        images: [listingToEdit!.imageUrl, ...(listingToEdit!.additionalImages || [])].filter(Boolean) as string[],
+      };
+      console.log("handleEditListing: Backend payload constructed:", backendPayload);
+      console.log("handleEditListing: Image files for update:", imageFiles);
+
+      // Update listing text data and potentially new images
+      await updateListing(listingIdToUpdate, backendPayload, imageFiles);
+      console.log("handleEditListing: updateListing API call finished.");
 
       // Refresh all listings after updating
       await initialFetch()
@@ -269,6 +296,7 @@ export default function ProfilePage() {
         description: "Your card listing has been updated.",
       })
     } catch (error) {
+      console.error("Failed to update listing:", error)
       toast({
         title: "Error",
         description: "Failed to update listing. Please try again.",
@@ -581,7 +609,7 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {soldListings.map((card) => (
                           <div key={card.id} className="relative">
-                            <PokemonCard card={card} onClick={() => setSelectedCard(card)} isSold />
+                            <PokemonCard card={card} onClick={() => setSelectedCard(card)} />
                           </div>
                         ))}
                       </div>
@@ -601,14 +629,15 @@ export default function ProfilePage() {
       {/* Card Detail Modal */}
       {selectedCard && <PokemonCardDetail card={selectedCard} onClose={() => setSelectedCard(null)} />}
 
-      {/* Create Listing Modal */}
+      {/* Listing Modal Form */}
       {isCreateModalOpen && (
-        <CreateListingModal onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreateListing} />
+        <ListingFormModal mode="create" onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreateListing} />
       )}
 
       {/* Edit Listing Modal */}
       {isEditModalOpen && listingToEdit && (
-        <EditListingModal
+        <ListingFormModal
+          mode="edit"
           listing={listingToEdit}
           onClose={() => {
             setIsEditModalOpen(false)

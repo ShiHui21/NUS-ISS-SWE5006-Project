@@ -1,32 +1,72 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Upload, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { ListingType } from "@/types/listing"
 import Image from "next/image"
+import type { ListingType } from "@/types/listing"
 
-interface EditListingModalProps {
-  listing: ListingType
+interface ListingFormModalProps {
   onClose: () => void
-  onSubmit: (listing: ListingType) => void
+  onSubmit: (
+    listingData: {
+      id?: string
+      title: string
+      description: string
+      price: number
+      cardType: string
+      rarity: string
+      cardCondition: string
+    },
+    imageFiles: File[],
+  ) => void
+  listing?: ListingType | null
+  mode: "create" | "edit"
 }
 
-export function EditListingModal({ listing, onClose, onSubmit }: EditListingModalProps) {
+export function ListingFormModal({ onClose, onSubmit, listing, mode }: ListingFormModalProps) {
   const [formData, setFormData] = useState({
-    ...listing,
-    price: listing.price.toString(),
+    title: "",
+    description: "",
+    price: "",
+    cardType: "",
+    rarity: "",
+    cardCondition: "",
   })
 
-  const [mainImage, setMainImage] = useState<string | null>(listing.imageUrl)
-  const [additionalImages, setAdditionalImages] = useState<string[]>(listing.additionalImages || [])
+  const [mainImage, setMainImage] = useState<string | null>(null)
+  const [additionalImages, setAdditionalImages] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
+
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null)
+  const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([])
+
+  // Initialize form data if editing an existing listing
+  useEffect(() => {
+    if (mode === "edit" && listing) {
+      console.log(listing)
+      setFormData({
+        title: listing.title || "",
+        description: listing.description || "",
+        price: listing.price?.toString() || "",
+        cardType: listing.cardType,
+        rarity: listing.rarity,
+        cardCondition: listing.condition,
+      })
+      // Set images if available
+      if (listing.imageUrl) {
+        setMainImage(listing.imageUrl)
+        if (listing.additionalImages) {
+          setAdditionalImages(listing.additionalImages)
+        }
+      }
+    }
+  }, [listing, mode])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -41,54 +81,66 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
     const file = e.target.files?.[0]
     if (!file) return
 
-    setIsUploading(true)
-
-    // Simulate file upload - in a real app, you would upload to a server
     const reader = new FileReader()
     reader.onload = () => {
       if (isMain) {
         setMainImage(reader.result as string)
+        setMainImageFile(file)
       } else {
         setAdditionalImages((prev) => [...prev, reader.result as string])
+        setAdditionalImageFiles((prev) => [...prev, file])
       }
-      setIsUploading(false)
     }
     reader.readAsDataURL(file)
-
-    // Reset the input value so the same file can be selected again if needed
     e.target.value = ""
   }
 
   const removeImage = (index: number) => {
     setAdditionalImages((prev) => prev.filter((_, i) => i !== index))
+    setAdditionalImageFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
   const removeMainImage = () => {
     setMainImage(null)
+    setMainImageFile(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const price = Number.parseFloat(formData.price)
-
     if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price")
+      console.error("Validation failed: Price must be a positive number")
       return
     }
 
-    if (!mainImage) {
-      alert("Please upload a main image")
+    // In edit mode, we don't require a main image if one already exists
+    if (mode === "create" && !mainImageFile && !mainImage) {
+      console.error("Validation failed: Main image is required for new listings")
       return
     }
 
-    onSubmit({
-      ...formData,
+    const listingDataPayload = {
+      ...(mode === "edit" && listing ? { id: listing.id } : {}),
+      title: formData.title,
+      description: formData.description,
       price,
-      imageUrl: mainImage,
-      additionalImages,
-    })
+      cardType: formData.cardType,
+      rarity: formData.rarity,
+      cardCondition: formData.cardCondition,
+    }
+
+    const imageFiles: File[] = []
+    if (mainImageFile) {
+      imageFiles.push(mainImageFile)
+    }
+    imageFiles.push(...additionalImageFiles)
+
+    onSubmit(listingDataPayload, imageFiles)
   }
+
+  const modalTitle = mode === "create" ? "Create New Listing" : "Edit Listing"
+  const submitButtonText = mode === "create" ? "Create Listing" : "Update Listing"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -99,7 +151,7 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
         </Button>
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-blue-700 mb-6">Edit Listing</h2>
+          <h2 className="text-2xl font-bold text-blue-700 mb-6">{modalTitle}</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -109,6 +161,7 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
+                placeholder="Charizard Holo 1st Edition"
                 required
                 className="border-gray-200 focus:border-blue-300"
               />
@@ -121,9 +174,23 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+                placeholder="Describe your card's details, history, and any special features..."
                 required
                 className="min-h-[100px] resize-none border-gray-200 focus:border-blue-300"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cardType">Card Type</Label>
+              <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
+                <SelectTrigger id="cardType" className="border-gray-200">
+                  <SelectValue placeholder="Select Card Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
+                  <SelectItem value="Trainer Card">Trainer Card</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -132,11 +199,10 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 id="price"
                 name="price"
                 type="number"
-                // min="2"
-                // max="100"
                 step="0.01"
                 value={formData.price}
                 onChange={handleChange}
+                placeholder="29.99"
                 required
                 className="border-gray-200 focus:border-blue-300"
               />
@@ -236,27 +302,30 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                     <SelectValue placeholder="Select Rarity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="common">Common</SelectItem>
-                    <SelectItem value="uncommon">Uncommon</SelectItem>
-                    <SelectItem value="rare">Rare</SelectItem>
-                    <SelectItem value="ultra-rare">Ultra Rare</SelectItem>
-                    <SelectItem value="secret-rare">Secret Rare</SelectItem>
+                    <SelectItem value="Common">Common</SelectItem>
+                    <SelectItem value="Uncommon">Uncommon</SelectItem>
+                    <SelectItem value="Rare">Rare</SelectItem>
+                    <SelectItem value="Double Rare">Double Rare</SelectItem>
+                    <SelectItem value="Illustration Rare">Illustration Rare</SelectItem>
+                    <SelectItem value="Special Illustration Rare">Special Illustration Rare</SelectItem>
+                    <SelectItem value="Hyper Rare">Hyper Rare</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="condition">Condition</Label>
-                <Select value={formData.cardCondition} onValueChange={(value) => handleSelectChange("condition", value)}>
-                  <SelectTrigger id="condition" className="border-gray-200">
+                <Label htmlFor="cardCondition">Condition</Label>
+                <Select value={formData.cardCondition} onValueChange={(value) => handleSelectChange("cardCondition", value)}>
+                  <SelectTrigger id="cardCondition" className="border-gray-200">
                     <SelectValue placeholder="Select Condition" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="mint">Mint</SelectItem>
-                    <SelectItem value="near-mint">Near Mint</SelectItem>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="played">Played</SelectItem>
+                    <SelectItem value="Brand New">Brand New</SelectItem>
+                    <SelectItem value="Like New">Like New</SelectItem>
+                    <SelectItem value="Lightly Used">Lightly Used</SelectItem>
+                    <SelectItem value="Well Used">Well Used</SelectItem>
+                    <SelectItem value="Heavily Used">Heavily Used</SelectItem>
+                    <SelectItem value="Damage">Damage</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -267,7 +336,7 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
                 Cancel
               </Button>
               <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                Save Changes
+                {submitButtonText}
               </Button>
             </div>
           </form>

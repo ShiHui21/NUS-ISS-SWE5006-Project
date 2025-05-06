@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
 import { PlaceholderImage } from "@/components/placeholder-image"
+import { callAddToWishlist } from "@/lib/api-service"
 
 interface PokemonCardDetailProps {
   card: ListingType
@@ -84,18 +85,8 @@ export function PokemonCardDetail({
 
   const addToWishlist = async () => {
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch("/api/wishlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ listingId: card.id }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to add to wishlist")
-      }
+      // Call the API service function to add to wishlist
+      await callAddToWishlist(card.id)
 
       setIsInWishlist(true)
 
@@ -104,6 +95,7 @@ export function PokemonCardDetail({
         description: "The card has been added to your wishlist.",
       })
     } catch (error) {
+      console.error("Failed to add to wishlist:", error)
       toast({
         title: "Error",
         description: "Failed to add to wishlist. Please try again.",

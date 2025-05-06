@@ -1,8 +1,7 @@
 import type { ListingType } from "@/types/listing"
 import type { UserType } from "@/types/user"
 
-const BASE_URL = "http://localhost:8080"
-// const BASE_URL = "http://13.213.45.86:8080"
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8080';
 
 // Auth token management
 const getToken = (): string | null => {
@@ -81,7 +80,6 @@ export const registerUser = async (userData: {
     },
     body: JSON.stringify(userData),
   })
-  console.log(userData)
   if (!response.ok) {
     const errorData = await response.json()
     const error = new Error("Registration failed")
@@ -170,9 +168,10 @@ export const getFilteredListings = async (filters: {
       additionalImages: listing.images ? listing.images.slice(1) : [],
       rarity: listing.rarity,
       condition: listing.cardCondition,
+      cardType: listing.cardType,
       sellerId: listing.userId,
       sellerName: listing.username,
-      sellerRegion: listing.regione,
+      sellerRegion: listing.region,
       listingStatus: listing.listingStatus,
     }))
 
@@ -188,57 +187,6 @@ export const getFilteredListings = async (filters: {
     throw error
   }
 }
-
-// export const getListingDetails = async (listingId: string): Promise<ListingType> => {
-//   const response = await fetch(`${BASE_URL}/listing/get-listing-details/${listingId}`, {
-//     headers: authHeaders(),
-//   })
-
-//   if (!response.ok) {
-//     throw new Error("Failed to fetch listing details")
-//   }
-
-//   const listing = await response.json()
-
-//   // Transform backend response to match our ListingType
-//   return {
-//     id: listing.id,
-//     title: listing.listingTitle,
-//     description: listing.description || "",
-//     price: listing.price,
-//     imageUrl: listing.images && listing.images.length > 0 ? listing.images[0] : "",
-//     additionalImages: listing.images ? listing.images.slice(1) : [],
-//     rarity: listing.rarity?.toLowerCase() || "common",
-//     condition: listing.cardCondition?.toLowerCase().replace(" ", "-") || "good",
-//     sellerId: listing.userId,
-//     sellerName: listing.username,
-//     sellerRegion: "unknown", // Backend doesn't provide this directly
-//     sold: listing.status === "SOLD",
-//   }
-// }
-
-// export const createListing = async (listing: {
-//   listingTitle: string
-//   cardCondition: string
-//   cardType: string
-//   rarity: string
-//   images: string[]
-//   price: number
-//   description: string
-// }): Promise<string> => {
-//   const response = await fetch(`${BASE_URL}/listing/create-listing`, {
-//     method: "POST",
-//     headers: authHeaders(),
-//     body: JSON.stringify(listing),
-//   })
-
-//   if (!response.ok) {
-//     throw new Error("Failed to create listing")
-//   }
-
-//   const data = await response.json()
-//   return data.id
-// }
 
 export const createListing = async (
   listing: {
@@ -272,26 +220,69 @@ export const createListing = async (
   }
 }
 
-export const updateListing = async (
-  listingId: string,
+export async function updateListing(
+  listingId: string, 
   listing: {
     listingTitle: string
-    cardCondition: string
+    cardCondition: string 
     cardType: string
     rarity: string
     images: string[]
     price: number
     description: string
   },
-): Promise<void> => {
-  const response = await fetch(`${BASE_URL}/listing/update-listing/${listingId}`, {
-    method: "PUT",
-    headers: authHeaders(),
-    body: JSON.stringify(listing),
-  })
+  imageFiles?: File[]
+): Promise<void> {
+  try {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      throw new Error("Authentication token not found");
+    }
 
-  if (!response.ok) {
-    throw new Error("Failed to update listing")
+    // First, update the listing data
+    const response = await fetch(`${BASE_URL}/listings/${listingId}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(listing),
+    });
+
+    console.log(listing)
+
+    if (!response.ok) {
+      throw new Error(`Failed to update listing: ${response.statusText}`);
+    }
+
+    // If there are image files to upload, handle them separately
+    if (imageFiles && imageFiles.length > 0) {
+      const formData = new FormData();
+      
+      // Append each image file to the form data
+      imageFiles.forEach((file, index) => {
+        formData.append(`images`, file);
+      });
+
+      console.log(imageFiles)
+
+      // Send the images to a separate endpoint or with a different request
+      const imageResponse = await fetch(`${BASE_URL}/listings/${listingId}/images`, {
+        method: "POST", // or "PUT" depending on your API
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          // Note: Don't set Content-Type header when using FormData
+        },
+        body: formData,
+      });
+
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to upload images: ${imageResponse.statusText}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error updating listing:", error);
+    throw error;
   }
 }
 
@@ -312,27 +303,56 @@ export const markAsSoldListing = async (listingId: string): Promise<void> => {
     headers: authHeaders(),
   })
 
+  console.log(listingId)
   if (!response.ok) {
     throw new Error("Failed to mark listing as sold")
   }
 }
 
-// Helper functions to convert between frontend and backend data formats
-export const convertToBackendListing = (listing: Partial<ListingType>): any => {
-  // Handle potentially undefined rarity
-  const rarityValue = listing.rarity
-    ? listing.rarity.charAt(0).toUpperCase() + listing.rarity.slice(1)
-    : "Common" // Default value if rarity is undefined
+export const callAddToWishlist = async (listingId: string): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/cart/add-to-cart/${listingId}`, {
+    method: "POST",
+    headers: authHeaders(),
+  })
 
-  return {
-    listingTitle: listing.title,
-    cardCondition: listing.condition?.replace("-", " ") ?? "Not Specified", // Provide default for condition too
-    cardType: "Pokemon Card", // Default value
-    rarity: rarityValue,
-    images: [listing.imageUrl, ...(listing.additionalImages || [])].filter(Boolean),
-    price: listing.price,
-    description: listing.description,
+  if (!response.ok) {
+    throw new Error("Failed to add to wishlist")
   }
+}
+
+export const callRemoveFromWishlist = async (listingId: string): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/cart/delete-from-cart/${listingId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to remove from wishlist")
+  }
+  // console.log(response)
+}
+
+export const getWishlist = async (): Promise<ListingType[]> => {
+  const response = await fetch(`${BASE_URL}/cart/get-cart-items`, {
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch wishlist items")
+  }
+  const data = await response.json()
+  const allListings = data.flatMap((seller: { items: any[] }) =>
+    seller.items.map(item => ({
+      id: item.id,
+      title: item.listingTitle,
+      cardCondition: item.cardCondition,
+      rarity: item.rarity,
+      price: item.price,
+      imageUrl: item.mainImage
+    }))
+  );
+  // console.log(allListings)
+  return allListings;
 }
 
 // Mock API functions for features not yet implemented in the backend
