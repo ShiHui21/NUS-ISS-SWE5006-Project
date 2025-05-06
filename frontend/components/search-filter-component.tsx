@@ -17,12 +17,14 @@ interface FilterOption {
 }
 
 interface SearchFilterProps {
-  onSearch?: (query: string) => void
+  onSearch?: () => void
   onFilter?: (filters: FilterState) => void
   onSort?: (sortOption: string) => void
+  onReset?: () => void
   showSearch?: boolean
   showPriceFilter?: boolean
   showRegionFilter?: boolean
+  showCardTypeFilter?: boolean
   initialFilters?: Partial<FilterState>
 }
 
@@ -32,7 +34,8 @@ export interface FilterState {
   maxPrice: string
   regions: string[]
   rarities: string[]
-  conditions: string[]
+  cardConditions: string[]
+  cardTypes: string[]
   sortBy: string
 }
 
@@ -40,51 +43,63 @@ const sortOptions: FilterOption[] = [
   { value: "default", label: "Default Sort" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "rarity-asc", label: "Rarity: Common to Rare" },
-  { value: "rarity-desc", label: "Rarity: Rare to Common" },
-  { value: "condition-asc", label: "Condition: Poor to Mint" },
-  { value: "condition-desc", label: "Condition: Mint to Poor" },
+  { value: "rarity-asc", label: "Rarity: Hyper Rare to Common" },
+  { value: "rarity-desc", label: "Rarity: Common to Hyper Rare" },
+  { value: "condition-asc", label: "Condition: Damaged to Brand New" },
+  { value: "condition-desc", label: "Condition: Brand New to Damaged" },
 ]
 
 const rarityOptions: FilterOption[] = [
-  { value: "common", label: "Common" },
-  { value: "uncommon", label: "Uncommon" },
-  { value: "rare", label: "Rare" },
-  { value: "ultra-rare", label: "Ultra Rare" },
-  { value: "secret-rare", label: "Secret Rare" },
+  { value: "Common", label: "Common" },
+  { value: "Uncommon", label: "Uncommon" },
+  { value: "Rare", label: "Rare" },
+  { value: "Double Rare", label: "Double Rare" },
+  { value: "Illustration Rare", label: "Illustration Rare" },
+  { value: "Special Illustration Rare", label: "Special Illustration Rare" },
+  { value: "Hyper Rare", label: "Hyper Rare" },
 ]
 
-const conditionOptions: FilterOption[] = [
-  { value: "mint", label: "Mint" },
-  { value: "near-mint", label: "Near Mint" },
-  { value: "excellent", label: "Excellent" },
-  { value: "good", label: "Good" },
-  { value: "played", label: "Played" },
+const cardConditionOptions: FilterOption[] = [
+  { value: "Brand New", label: "Brand New" },
+  { value: "Like New", label: "Like New" },
+  { value: "Lightly Used", label: "Lightly Used" },
+  { value: "Well Used", label: "Well Used" },
+  { value: "Heavily Used", label: "Heavily Used" },
+  { value: "Damage", label: "Damaged" },
+]
+
+const cardTypeOptions: FilterOption[] = [
+  { value: "Pokemon Card", label: "Pokémon Card" },
+  { value: "Trainer Card", label: "Trainer Card" },
 ]
 
 const regionOptions: FilterOption[] = [
-  { value: "north", label: "North" },
-  { value: "south", label: "South" },
-  { value: "east", label: "East" },
-  { value: "west", label: "West" },
+  { value: "Central Region", label: "Central Region" },
+  { value: "North Region", label: "North Region" },
+  { value: "East Region", label: "East Region" },
+  { value: "North East Region", label: "North East Region" },
+  { value: "West Region", label: "West Region" },
 ]
 
 export function SearchFilterComponent({
   onSearch,
   onFilter,
   onSort,
+  onReset,
   showSearch = true,
   showPriceFilter = true,
   showRegionFilter = true,
+  showCardTypeFilter = true,
   initialFilters,
 }: SearchFilterProps) {
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: initialFilters?.searchQuery || "",
-    minPrice: initialFilters?.minPrice || "2",
-    maxPrice: initialFilters?.maxPrice || "100",
+    minPrice: initialFilters?.minPrice || "",
+    maxPrice: initialFilters?.maxPrice || "",
     regions: initialFilters?.regions || [],
     rarities: initialFilters?.rarities || [],
-    conditions: initialFilters?.conditions || [],
+    cardConditions: initialFilters?.cardConditions || [],
+    cardTypes: initialFilters?.cardTypes || [],
     sortBy: initialFilters?.sortBy || "default",
   })
 
@@ -106,7 +121,6 @@ export function SearchFilterComponent({
     const value = e.target.value
     setFilters((prev) => {
       const newFilters = { ...prev, searchQuery: value }
-      if (onSearch) onSearch(value)
       if (onFilter) onFilter(newFilters)
       return newFilters
     })
@@ -115,7 +129,7 @@ export function SearchFilterComponent({
   // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (onFilter) onFilter(filters)
+      if (onSearch) onSearch()
     }
   }
 
@@ -130,7 +144,7 @@ export function SearchFilterComponent({
   }
 
   // Handle filter option toggle
-  const toggleFilter = (value: string, type: "rarities" | "conditions" | "regions") => {
+  const toggleFilter = (value: string, type: "rarities" | "cardConditions" | "regions" | "cardTypes") => {
     setFilters((prev) => {
       const isSelected = prev[type].includes(value)
       const newValues = isSelected ? prev[type].filter((v) => v !== value) : [...prev[type], value]
@@ -144,16 +158,16 @@ export function SearchFilterComponent({
   const resetFilters = () => {
     const resetState = {
       searchQuery: "",
-      minPrice: "2",
-      maxPrice: "100",
+      minPrice: "",
+      maxPrice: "",
       regions: [],
       rarities: [],
-      conditions: [],
+      cardConditions: [],
+      cardTypes: [],
       sortBy: "default",
     }
 
     setFilters(resetState)
-    if (onSearch) onSearch("")
     if (onFilter) onFilter(resetState)
     if (onSort) onSort("default")
   }
@@ -201,7 +215,24 @@ export function SearchFilterComponent({
               </Select>
             </div>
 
-            <Button onClick={resetFilters} variant="outline" className="border-gray-300 text-blue-600 hover:bg-blue-50">
+            <Button
+              onClick={() => {
+                if (onSearch) onSearch()
+              }}
+              variant="default"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Search
+            </Button>
+
+            <Button
+              onClick={() => {
+                resetFilters()
+                if (onReset) onReset()
+              }}
+              variant="outline"
+              className="border-gray-300 text-blue-600 hover:bg-blue-50"
+            >
               Reset
             </Button>
           </div>
@@ -248,7 +279,7 @@ export function SearchFilterComponent({
                     <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0" align="start">
+                <PopoverContent className="w-[250px] p-0" align="start">
                   <div className="p-2">
                     {rarityOptions.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
@@ -276,18 +307,18 @@ export function SearchFilterComponent({
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between">
-                    {getMultiselectLabel(conditionOptions, filters.conditions)}
+                    {getMultiselectLabel(cardConditionOptions, filters.cardConditions)}
                     <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0" align="start">
                   <div className="p-2">
-                    {conditionOptions.map((option) => (
+                    {cardConditionOptions.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
                         <Checkbox
                           id={`condition-${option.value}`}
-                          checked={filters.conditions.includes(option.value)}
-                          onCheckedChange={() => toggleFilter(option.value, "conditions")}
+                          checked={filters.cardConditions.includes(option.value)}
+                          onCheckedChange={() => toggleFilter(option.value, "cardConditions")}
                         />
                         <label
                           htmlFor={`condition-${option.value}`}
@@ -301,6 +332,41 @@ export function SearchFilterComponent({
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* Card Type Dropdown */}
+            {showCardTypeFilter && (
+            <div className="flex items-center gap-2">
+              <Label className="whitespace-nowrap w-16">Card Type:</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {getMultiselectLabel(cardTypeOptions, filters.cardTypes)}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0" align="start">
+                  <div className="p-2">
+                    {cardTypeOptions.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
+                        <Checkbox
+                          id={`cardType-${option.value}`}
+                          checked={filters.cardTypes.includes(option.value)}
+                          onCheckedChange={() => toggleFilter(option.value, "cardTypes")}
+                        />
+                        <label
+                          htmlFor={`cardType-${option.value}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer w-full"
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            )}
+
 
             {/* Region Dropdown */}
             {showRegionFilter && (

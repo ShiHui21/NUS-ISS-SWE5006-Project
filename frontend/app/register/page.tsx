@@ -42,8 +42,8 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, region: value }))
 
     setErrors((prev) => {
-      if (!prev.location) return prev;
-      const { location, ...rest } = prev;
+      if (!prev.region) return prev;
+      const { region, ...rest } = prev;
       return rest;
     });
   }
@@ -70,7 +70,7 @@ export default function RegisterPage() {
     if (formData.region ==="") {
       setErrors((prev) => ({
         ...prev,
-        location: "Please select a region.",
+        region: "Please select a region.",
       }));
       return
     }
@@ -85,7 +85,7 @@ export default function RegisterPage() {
         name: formData.name,
         email: formData.email,
         mobileNumber: formData.mobile,
-        location: formData.region,
+        region: formData.region,
       })
 
       toast({
@@ -197,31 +197,37 @@ export default function RegisterPage() {
                   className="grid grid-cols-2 gap-2"
                 >
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="north" id="north" />
-                    <Label htmlFor="north" className="cursor-pointer">
+                    <RadioGroupItem value="Central Region" id="north" />
+                    <Label htmlFor="Central Region" className="cursor-pointer">
                       North
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="south" id="south" />
-                    <Label htmlFor="south" className="cursor-pointer">
+                    <RadioGroupItem value="North Region" id="north" />
+                    <Label htmlFor="North Region" className="cursor-pointer">
+                      North
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
+                    <RadioGroupItem value="East Region" id="south" />
+                    <Label htmlFor="East Region" className="cursor-pointer">
                       South
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="east" id="east" />
-                    <Label htmlFor="east" className="cursor-pointer">
+                    <RadioGroupItem value="North East Region" id="east" />
+                    <Label htmlFor="North East Region" className="cursor-pointer">
                       East
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="west" id="west" />
-                    <Label htmlFor="west" className="cursor-pointer">
+                    <RadioGroupItem value="West Region" id="west" />
+                    <Label htmlFor="West Region" className="cursor-pointer">
                       West
                     </Label>
                   </div>
                 </RadioGroup>
-                {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
+                {errors.region && <p className="text-sm text-red-500">{errors.region}</p>}
               </div>
 
               <div className="space-y-2">

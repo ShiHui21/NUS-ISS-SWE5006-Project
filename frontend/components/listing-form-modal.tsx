@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Upload, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,30 +9,34 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from "next/image"
+import type { ListingType } from "@/types/listing"
 
-interface CreateListingModalProps {
+interface ListingFormModalProps {
   onClose: () => void
   onSubmit: (
     listingData: {
-      title: string;
-      description: string;
-      price: number;
-      cardType: string;
-      rarity: string;
-      cardCondition: string;
+      id?: string
+      title: string
+      description: string
+      price: number
+      cardType: string
+      rarity: string
+      cardCondition: string
     },
-    imageFiles: File[]
+    imageFiles: File[],
   ) => void
+  listing?: ListingType | null
+  mode: "create" | "edit"
 }
 
-export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProps) {
+export function ListingFormModal({ onClose, onSubmit, listing, mode }: ListingFormModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     price: "",
     cardType: "",
     rarity: "",
-    condition: "",
+    cardCondition: "",
   })
 
   const [mainImage, setMainImage] = useState<string | null>(null)
@@ -43,6 +46,27 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
   const [mainImageFile, setMainImageFile] = useState<File | null>(null)
   const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([])
 
+  // Initialize form data if editing an existing listing
+  useEffect(() => {
+    if (mode === "edit" && listing) {
+      console.log(listing)
+      setFormData({
+        title: listing.title || "",
+        description: listing.description || "",
+        price: listing.price?.toString() || "",
+        cardType: listing.cardType,
+        rarity: listing.rarity,
+        cardCondition: listing.condition,
+      })
+      // Set images if available
+      if (listing.imageUrl) {
+        setMainImage(listing.imageUrl)
+        if (listing.additionalImages) {
+          setAdditionalImages(listing.additionalImages)
+        }
+      }
+    }
+  }, [listing, mode])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -56,7 +80,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isMain = true) => {
     const file = e.target.files?.[0]
     if (!file) return
-  
+
     const reader = new FileReader()
     reader.onload = () => {
       if (isMain) {
@@ -70,32 +94,40 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
     reader.readAsDataURL(file)
     e.target.value = ""
   }
-  
 
   const removeImage = (index: number) => {
     setAdditionalImages((prev) => prev.filter((_, i) => i !== index))
+    setAdditionalImageFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
   const removeMainImage = () => {
     setMainImage(null)
+    setMainImageFile(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const price = Number.parseFloat(formData.price)
-    if (isNaN(price) || price <= 0 || !mainImageFile) {
-      console.error("Validation failed: Price must be a positive number and main image is required.")
+    if (isNaN(price) || price <= 0) {
+      console.error("Validation failed: Price must be a positive number")
+      return
+    }
+
+    // In edit mode, we don't require a main image if one already exists
+    if (mode === "create" && !mainImageFile && !mainImage) {
+      console.error("Validation failed: Main image is required for new listings")
       return
     }
 
     const listingDataPayload = {
+      ...(mode === "edit" && listing ? { id: listing.id } : {}),
       title: formData.title,
       description: formData.description,
       price,
       cardType: formData.cardType,
       rarity: formData.rarity,
-      cardCondition: formData.condition,
+      cardCondition: formData.cardCondition,
     }
 
     const imageFiles: File[] = []
@@ -105,10 +137,10 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
     imageFiles.push(...additionalImageFiles)
 
     onSubmit(listingDataPayload, imageFiles)
-
-    onClose()
   }
-  
+
+  const modalTitle = mode === "create" ? "Create New Listing" : "Edit Listing"
+  const submitButtonText = mode === "create" ? "Create Listing" : "Update Listing"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -119,7 +151,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
         </Button>
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-blue-700 mb-6">Create New Listing</h2>
+          <h2 className="text-2xl font-bold text-blue-700 mb-6">{modalTitle}</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -149,17 +181,17 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="cardType">Card Type</Label>
-                <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
-                  <SelectTrigger id="cardType" className="border-gray-200">
-                    <SelectValue placeholder="Select Card Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
-                    <SelectItem value="Trainer Card">Trainer Card</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Label htmlFor="cardType">Card Type</Label>
+              <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
+                <SelectTrigger id="cardType" className="border-gray-200">
+                  <SelectValue placeholder="Select Card Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
+                  <SelectItem value="Trainer Card">Trainer Card</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="price">Price ($)</Label>
@@ -167,8 +199,6 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
                 id="price"
                 name="price"
                 type="number"
-                // min="2"
-                // max="100"
                 step="0.01"
                 value={formData.price}
                 onChange={handleChange}
@@ -183,7 +213,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
               {mainImage ? (
                 <div className="relative rounded-md overflow-hidden">
                   <Image
-                    src={mainImage}
+                    src={mainImage || "/placeholder.svg"}
                     alt="Main card image"
                     width={300}
                     height={300}
@@ -284,9 +314,9 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="condition">Condition</Label>
-                <Select value={formData.condition} onValueChange={(value) => handleSelectChange("condition", value)}>
-                  <SelectTrigger id="condition" className="border-gray-200">
+                <Label htmlFor="cardCondition">Condition</Label>
+                <Select value={formData.cardCondition} onValueChange={(value) => handleSelectChange("cardCondition", value)}>
+                  <SelectTrigger id="cardCondition" className="border-gray-200">
                     <SelectValue placeholder="Select Condition" />
                   </SelectTrigger>
                   <SelectContent>
@@ -306,7 +336,7 @@ export function CreateListingModal({ onClose, onSubmit }: CreateListingModalProp
                 Cancel
               </Button>
               <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                Create Listing
+                {submitButtonText}
               </Button>
             </div>
           </form>

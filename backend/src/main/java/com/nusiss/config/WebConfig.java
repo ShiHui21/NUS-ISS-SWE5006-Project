@@ -16,7 +16,10 @@ public class WebConfig implements WebMvcConfigurer {
 //            .allowCredentials(true)
 //            .maxAge(3600); // Cache preflight request for 1 hour
         registry.addMapping("/**")       // all paths
-                .allowedOrigins("*")     // allow all origins
+                .allowedOrigins(
+                        "http://localhost:3000",
+                        "https://nus-iss-swe-5006-project-git-frontend-shihui21s-projects.vercel.app"
+                )
                 .allowedMethods("*")     // allow GET, POST, PUT, DELETE etc.
                 .allowedHeaders("*");    // allow any header
     }

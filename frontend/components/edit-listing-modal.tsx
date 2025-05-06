@@ -247,7 +247,7 @@ export function EditListingModal({ listing, onClose, onSubmit }: EditListingModa
 
               <div className="space-y-2">
                 <Label htmlFor="condition">Condition</Label>
-                <Select value={formData.condition} onValueChange={(value) => handleSelectChange("condition", value)}>
+                <Select value={formData.cardCondition} onValueChange={(value) => handleSelectChange("condition", value)}>
                   <SelectTrigger id="condition" className="border-gray-200">
                     <SelectValue placeholder="Select Condition" />
                   </SelectTrigger>

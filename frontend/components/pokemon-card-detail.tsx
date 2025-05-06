@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
 import { PlaceholderImage } from "@/components/placeholder-image"
+import { callAddToWishlist } from "@/lib/api-service"
 
 interface PokemonCardDetailProps {
   card: ListingType
@@ -39,39 +40,53 @@ export function PokemonCardDetail({
     setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))
   }
 
-  const rarityColors = {
-    common: "bg-gray-200 text-gray-800",
-    uncommon: "bg-green-200 text-green-800",
-    rare: "bg-blue-200 text-blue-800",
-    "ultra-rare": "bg-purple-200 text-purple-800",
-    "secret-rare": "bg-yellow-200 text-yellow-800",
+  const getRarityColor = (rarity: string) => {
+    switch (rarity) {
+      case "Common":
+        return "bg-gray-200 text-gray-800"
+      case "Uncommon":
+        return "bg-green-200 text-green-800"
+      case "Rare":
+        return "bg-blue-200 text-blue-800"
+      case "Double Rare":
+        return "bg-purple-200 text-purple-800"
+      case "Illustration Rare":
+        return "bg-pink-200 text-pink-800"
+      case "Special Illustration Rare":
+        return "bg-yellow-200 text-yellow-800"
+      case "Hyper Rare":
+        return "bg-red-200 text-red-800"
+      default:
+        return "bg-gray-200 text-gray-800"
+    }
   }
 
-  const conditionColors = {
-    mint: "bg-emerald-200 text-emerald-800",
-    "near-mint": "bg-green-200 text-green-800",
-    excellent: "bg-blue-200 text-blue-800",
-    good: "bg-yellow-200 text-yellow-800",
-    played: "bg-orange-200 text-orange-800",
+  const getConditionColor = (condition: string) => {
+    switch (condition) {
+      case "Brand New":
+        return "bg-emerald-200 text-emerald-800"
+      case "Like New":
+        return "bg-green-200 text-green-800"
+      case "Lightly Used":
+        return "bg-blue-200 text-blue-800"
+      case "Well Used":
+        return "bg-yellow-200 text-yellow-800"
+      case "Heavily Used":
+        return "bg-orange-200 text-orange-800"
+      case "Damage":
+        return "bg-red-200 text-red-800"
+      default:
+        return "bg-gray-200 text-gray-800"
+    }
   }
 
-  const rarityColor = rarityColors[card.rarity as keyof typeof rarityColors] || rarityColors.common
-  const conditionColor = conditionColors[card.condition as keyof typeof conditionColors] || conditionColors.good
+  const rarityColor = getRarityColor(card.rarity)
+  const conditionColor = getConditionColor(card.condition)
 
   const addToWishlist = async () => {
     try {
-      // This would be replaced with actual API call to Spring Boot backend
-      const response = await fetch("/api/wishlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ listingId: card.id }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to add to wishlist")
-      }
+      // Call the API service function to add to wishlist
+      await callAddToWishlist(card.id)
 
       setIsInWishlist(true)
 
@@ -80,6 +95,7 @@ export function PokemonCardDetail({
         description: "The card has been added to your wishlist.",
       })
     } catch (error) {
+      console.error("Failed to add to wishlist:", error)
       toast({
         title: "Error",
         description: "Failed to add to wishlist. Please try again.",
@@ -101,7 +117,7 @@ export function PokemonCardDetail({
             <div className="relative rounded-lg overflow-hidden shadow-md">
               {allImages.length > 0 ? (
                 <>
-                  {imageError ? (
+                  {/* {imageError ? (
                     <PlaceholderImage
                       width={500}
                       height={500}
@@ -110,15 +126,23 @@ export function PokemonCardDetail({
                     />
                   ) : (
                     <Image
-                      src={allImages[currentImageIndex] || "/placeholder.svg"}
+                      src={allImages[currentImageIndex]}
                       alt={card.title}
                       width={500}
                       height={500}
                       className="w-full aspect-square object-cover"
                       onError={() => setImageError(true)}
                     />
-                  )}
-                  {card.sold && (
+                  )} */}
+                  <Image
+                      src={allImages[currentImageIndex]}
+                      alt={card.title}
+                      width={500}
+                      height={500}
+                      className="w-full aspect-square object-cover"
+                      onError={() => setImageError(true)}
+                    />
+                  {card.listingStatus==="Sold" && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <Badge className="text-lg px-3 py-1 bg-red-500 text-white">SOLD</Badge>
                     </div>
@@ -214,8 +238,8 @@ export function PokemonCardDetail({
             <h2 className="text-2xl font-bold text-blue-700 mb-2">{card.title}</h2>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              <Badge className={rarityColor}>{card.rarity.replace("-", " ")}</Badge>
-              <Badge className={conditionColor}>{card.condition.replace("-", " ")}</Badge>
+              <Badge className={rarityColor}>{card.rarity}</Badge>
+              <Badge className={conditionColor}>{card.condition}</Badge>
             </div>
 
             <div className="text-3xl font-bold text-yellow-600 mb-4">${card.price}</div>
@@ -230,10 +254,10 @@ export function PokemonCardDetail({
               <Link href={`/seller/${card.sellerId}`} className="text-blue-500 hover:underline font-medium">
                 {card.sellerName}
               </Link>
-              <p className="text-gray-600 mt-1">Region: {card.sellerRegion}</p>
+              {/* <p className="text-gray-600 mt-1">Region: {card.region}</p> */}
             </div>
 
-            {!card.sold && !showRemoveFromWishlist && (
+            {card.listingStatus!=="Sold" && !showRemoveFromWishlist && (
               <Button
                 onClick={addToWishlist}
                 disabled={isInWishlist}

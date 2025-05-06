@@ -63,9 +63,9 @@ export default function LogoutPage() {
             <Button onClick={handleLoginAgain} className="bg-blue-600 hover:bg-blue-700 text-white">
               Log In Again
             </Button>
-            <Button onClick={() => (window.location.href = "/explore")} variant="link" className="mt-2 text-blue-500">
+            {/* <Button onClick={() => (window.location.href = "/explore")} variant="link" className="mt-2 text-blue-500">
               Browse cards
-            </Button>
+            </Button> */}
           </CardContent>
         </Card>
       </div>
