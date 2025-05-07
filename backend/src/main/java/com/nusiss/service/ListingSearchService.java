@@ -70,14 +70,15 @@ public class ListingSearchService {
             sortOrder = "asc";
         }
 
-        boolean ascending = sortOrder.equalsIgnoreCase("asc");
         String sortField = switch (sortBy.toLowerCase()) {
             case "price" -> "price";
-            case "rarity" -> "rarity";
-            case "condition" -> "condition";
+            case "rarity" -> "rarityPriority";
+            case "condition" -> "conditionPriority";
             default -> "createdOn";
         };
 
-        return ascending ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
+        Sort.Direction direction = sortOrder.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        return Sort.by(direction, sortField);
     }
 }
