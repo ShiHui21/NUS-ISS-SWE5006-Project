@@ -185,23 +185,23 @@ public class ListingService {
 
         List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
 
-//        for (CartItem cartItem : cartItems) {
-//            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
-//
-//
-//            try {
-//                // Try real-time notification
-//                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-//                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-//            } catch (IOException e) {
-//                // WebSocket is closed or user is offline
-//                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-//            }
-//
-//            // Mark the cart item as notified
-//            cartItem.setNotifiedStatus();
-//            cartItemRepository.save(cartItem);
-//        }
+        for (CartItem cartItem : cartItems) {
+            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
+
+
+            try {
+                // Try real-time notification
+                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+            } catch (IOException e) {
+                // WebSocket is closed or user is offline
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+            }
+
+            // Mark the cart item as notified
+            cartItem.setNotifiedStatus();
+            cartItemRepository.save(cartItem);
+        }
 
         return ResponseEntity.ok("Listing marked as sold");
     }

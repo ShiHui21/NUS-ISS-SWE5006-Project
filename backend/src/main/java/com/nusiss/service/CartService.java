@@ -119,7 +119,13 @@ public class CartService {
     }
 
     public Set<UUID> getCartListingIds(UUID userId) {
-        Cart cart = cartRepository.findByUser_Id(userId).orElseThrow(() -> new EntityNotFoundException("Cart is not found"));
+        Cart cart = cartRepository.findByUser_Id(userId).orElseGet(() -> {
+            System.out.println("hereeeeee");
+            Cart newCart = new Cart();
+            User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+            newCart.setUser(user);
+            return cartRepository.save(newCart);
+        });
 
         List<CartItem> cartItems = cart.getItems();
 
