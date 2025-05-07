@@ -17,6 +17,8 @@ public class GetCartItemSummaryDTO {
 
     private String mainImage;
 
+    private String listingStatus;
+
     public UUID getId() {
         return id;
     }
@@ -59,5 +61,13 @@ public class GetCartItemSummaryDTO {
 
     public void setMainImage(String mainImage) {
         this.mainImage = mainImage;
+    }
+
+    public String getListingStatus() {
+        return listingStatus;
+    }
+
+    public void setListingStatus(String listingStatus) {
+        this.listingStatus = listingStatus;
     }
 }

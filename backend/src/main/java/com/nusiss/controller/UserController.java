@@ -63,4 +63,9 @@ AuthenticateUser authenticateUser, BindingResult bindingResult) {
 
         return ResponseEntity.ok(userService.getUserByID(userId));
     }
+
+    @GetMapping("/get-seller-details/{username}")
+    public ResponseEntity<GetUserDetailsDTO> getSeller(@PathVariable("username") String username, @AuthenticationPrincipal AuthenticateUser authenticateUser) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
+    }
 }

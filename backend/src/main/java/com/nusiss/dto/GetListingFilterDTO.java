@@ -7,6 +7,8 @@ public class GetListingFilterDTO {
 
     private String username;
 
+    private String listingTitle;
+
     private List<String> conditions;
 
     private List<String> listingStatuses;
@@ -14,6 +16,8 @@ public class GetListingFilterDTO {
     private List<String> rarities;
 
     private List<String> regions;
+
+    private List<String> cardTypes;
 
     private String title;
 
@@ -35,6 +39,8 @@ public class GetListingFilterDTO {
         return username;
     }
 
+    public String getListingTitle() {return listingTitle; }
+
     public List<String> getConditions() {
         return conditions;
     }
@@ -50,6 +56,8 @@ public class GetListingFilterDTO {
     public List<String> getRegions() {
         return regions;
     }
+
+    public List<String> getCardTypes() { return cardTypes; }
 
     public String getTitle() {
         return title;

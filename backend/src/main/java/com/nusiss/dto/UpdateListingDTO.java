@@ -22,7 +22,6 @@ public class UpdateListingDTO {
     @NotBlank(message = "Rarity is required!")
     private String rarity;
 
-    @NotEmpty(message = "At least one image URL is required")
     private List<String> images = new ArrayList<>();
 
     @NotNull(message = "Selling price for card is required!")

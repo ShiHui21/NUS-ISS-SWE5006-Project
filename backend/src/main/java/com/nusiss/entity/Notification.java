@@ -20,10 +20,10 @@ public class Notification {
 
     private boolean isRead;  // Whether the notification has been read by the user
 
-    public Notification() {}
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdOn;  // Timestamp of the notification creation
+
+    public Notification() {}
 
     @PrePersist
     public void prePersist() {

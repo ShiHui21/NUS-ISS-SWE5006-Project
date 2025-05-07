@@ -9,17 +9,13 @@ public class GetCartItemsDTO {
 
     private List<GetCartItemSummaryDTO> items;
 
-    public String getSellerName() {
-        return sellerName;
-    }
+    public String getSellerName() { return sellerName; }
 
     public void setSellerName(String sellerName) {
         this.sellerName = sellerName;
     }
 
-    public List<GetCartItemSummaryDTO> getItems() {
-        return items;
-    }
+    public List<GetCartItemSummaryDTO> getItems() { return items; }
 
     public void setItems(List<GetCartItemSummaryDTO> items) {
         this.items = items;
