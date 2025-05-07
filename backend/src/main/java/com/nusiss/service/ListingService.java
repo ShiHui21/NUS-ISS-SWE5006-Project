@@ -11,10 +11,6 @@ import com.nusiss.enums.Rarity;
 import com.nusiss.patterns.factory.ListingFactory;
 import com.nusiss.patterns.factory.PokemonCardListingFactory;
 import com.nusiss.patterns.factory.TrainerCardListingFactory;
-import com.nusiss.patterns.strategy.FilterSearchStrategy;
-import com.nusiss.patterns.strategy.SearchStrategy;
-import com.nusiss.patterns.strategy.UserExclusionStrategy;
-import com.nusiss.patterns.strategy.UsernameSearchStrategy;
 import com.nusiss.repository.CartItemRepository;
 import com.nusiss.repository.ListingRepository;
 import com.nusiss.repository.UserRepository;
@@ -22,9 +18,6 @@ import com.nusiss.util.ChangeTrackerUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -191,11 +184,11 @@ public class ListingService {
 
             try {
                 // Try real-time notification
-                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
             } catch (IOException e) {
                 // WebSocket is closed or user is offline
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is sold out!");
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
             }
 
             // Mark the cart item as notified
@@ -215,21 +208,30 @@ public class ListingService {
         }
 
         listing.setListingStatus(ListingStatus.DELETED);
+
+        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
+
+        for (CartItem cartItem : cartItems) {
+            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
+
+
+            try {
+                // Try real-time notification
+                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+            } catch (IOException e) {
+                // WebSocket is closed or user is offline
+                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+            }
+
+            // Mark the cart item as notified
+            cartItem.setNotifiedStatus();
+            cartItemRepository.save(cartItem);
+        }
+
 //        listingRepository.delete(listing);
         return ResponseEntity.status(HttpStatus.OK).body("Listing successfully soft deleted");
     }
-
-//    public GetListingsByUserDTO getListingsBySearchFilter(Map<String, String> searchCriteria) {
-//        User user = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//        List<Listing> listings = listingRepository.findAllBySeller_Id(user.getId());
-//
-//        GetUserDetailsDTO userDetailsDTO = new GetUserDetailsDTO(user);
-//            List<GetListingSummaryDTO> listingSummariesDTOs = listings.stream()
-//                .map(GetListingSummaryDTO::new)
-//                .toList();
-//
-//        return new GetListingsByUserDTO(userDetailsDTO.getUsername(), userDetailsDTO.getLocation(), listingSummariesDTOs);
-//    }
 
     public GetListingsDTO getListings(@RequestBody GetListingFilterDTO filter, UUID userId) {
 
