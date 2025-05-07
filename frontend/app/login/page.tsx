@@ -59,9 +59,9 @@ export default function LoginPage() {
               Poké<span className="text-yellow-500">Trade</span>
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-yellow-500 drop-shadow-md">
+          {/* <h1 className="text-3xl font-bold text-yellow-500 drop-shadow-md">
             <span className="text-blue-500">Poké</span>Trade
-          </h1>
+          </h1> */}
           <p className="text-gray-600 mt-2">Your premier Pokémon card marketplace</p>
         </div>
 

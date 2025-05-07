@@ -18,7 +18,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")       // all paths
                 .allowedOrigins(
                         "http://localhost:3000",
-                        "https://nus-iss-swe-5006-project-git-frontend-shihui21s-projects.vercel.app"
+                        "https://nus-iss-swe-5006-project-git-frontend-shihui21s-projects.vercel.app",
+                        "https://nus-iss-swe-5006-project.vercel.app"
                 )
                 .allowedMethods("*")     // allow GET, POST, PUT, DELETE etc.
                 .allowedHeaders("*");    // allow any header
