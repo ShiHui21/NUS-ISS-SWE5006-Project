@@ -15,8 +15,8 @@ import {
 import { Bell, User, Heart, LogOut, Menu } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { getNotificationsClient, markNotificationAsReadClient } from "@/lib/api"
 import type { NotificationType } from "@/types/notification"
+import { getNotifications, markNotificationAsRead } from "@/lib/api-service"
 
 export function Navbar() {
   const pathname = usePathname()
@@ -28,7 +28,7 @@ export function Navbar() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await getNotificationsClient()
+        const data = await getNotifications()
         setNotifications(data)
       } catch (error) {
         console.error("Failed to fetch notifications:", error)
@@ -47,7 +47,7 @@ export function Navbar() {
 
   const handleNotificationClick = async (id: string) => {
     try {
-      await markNotificationAsReadClient(id)
+      await markNotificationAsRead(id)
       setNotifications((prev) =>
         prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
       )
@@ -161,10 +161,10 @@ export function Navbar() {
                     className={`cursor-pointer flex flex-col items-start p-3 ${!notification.read ? "bg-blue-50" : ""}`}
                     onClick={() => handleNotificationClick(notification.id)}
                   >
-                    <div className="font-medium">{notification.title}</div>
+                    {/* <div className="font-medium">{notification.title}</div> */}
                     <div className="text-sm text-gray-600">{notification.message}</div>
                     <div className="text-xs text-gray-400 mt-1">
-                      {new Date(notification.createdAt).toLocaleString()}
+                      {new Date(notification.createOn).toLocaleString()}
                     </div>
                   </DropdownMenuItem>
                 ))

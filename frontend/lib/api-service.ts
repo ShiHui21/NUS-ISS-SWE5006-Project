@@ -1,5 +1,6 @@
 import type { ListingType } from "@/types/listing"
 import type { UserType } from "@/types/user"
+import type { NotificationType } from "@/types/notification";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8080';
 
@@ -117,7 +118,7 @@ export const getUserDetails = async (): Promise<UserType> => {
 
 export const getFilteredListings = async (filters: {
   excludeCurrentUser: boolean
-  title?: string
+  listingTitle?: string
   username?: string
   minPrice?: number
   maxPrice?: number
@@ -125,7 +126,7 @@ export const getFilteredListings = async (filters: {
   rarities?: string[]
   regions?: string[]
   conditions?: string[]
-  cardType?: string[]
+  cardTypes?: string[]
   sortBy?: string
   sortOrder?: string
   page?: number
@@ -169,10 +170,11 @@ export const getFilteredListings = async (filters: {
       rarity: listing.rarity,
       condition: listing.cardCondition,
       cardType: listing.cardType,
-      sellerId: listing.userId,
+      // sellerId: listing.userId,
       sellerName: listing.username,
       sellerRegion: listing.region,
       listingStatus: listing.listingStatus,
+      inCart: listing.inCart,
     }))
 
     return {
@@ -205,7 +207,13 @@ export const createListing = async (
   const formData = new FormData()
 
   formData.append("data", JSON.stringify(listing))
-  imageFiles.forEach((file) => formData.append("images", file))
+  // imageFiles.forEach((file) => formData.append("images", file))
+  if (imageFiles && imageFiles.length > 0) {
+    imageFiles.forEach((file) => formData.append("images", file));
+  } else {
+    // Ensure "images" field is present and represents an empty set of files.
+    formData.append("images", new Blob([]), "");
+  }
 
   const response = await fetch(`${BASE_URL}/listing/create-listing`, {
     method: "POST",
@@ -219,6 +227,19 @@ export const createListing = async (
     throw new Error(errorText || "Failed to create listing")
   }
 }
+
+// {
+//   "listingTitle": "Test_User1_test",
+//   "cardCondition": "Damage",
+//   "cardType": "Pokemon Card",
+//   "rarity": "Hyper Rare",
+//   "price": 123.00,
+//   "images": [
+//       "https://nus-iss-s3.s3.ap-southeast-1.amazonaws.com/cdf5ab10-4ad0-4ba6-a8df-3379d644c35b_c54be811-ee5e-4a0a-badd-f3ae5b9546dd_TrainerCardPokedex.png",
+//       "https://nus-iss-s3.s3.ap-southeast-1.amazonaws.com/a3e88db4-9528-4b84-afc8-ef0e99b81f4a_534143_370x480.jpg.webp"
+//   ],
+//   "description": "test"
+// }
 
 export async function updateListing(
   listingId: string, 
@@ -239,46 +260,30 @@ export async function updateListing(
       throw new Error("Authentication token not found");
     }
 
+    const formData = new FormData()
+
+    formData.append("data", JSON.stringify(listing))
+    if (imageFiles && imageFiles.length > 0) {
+      imageFiles.forEach((file) => formData.append("images", file));
+    } else {
+      // Ensure "images" field is present and represents an empty set of files.
+      formData.append("images", new Blob([]), "");
+    }
+
     // First, update the listing data
-    const response = await fetch(`${BASE_URL}/listings/${listingId}`, {
+    const response = await fetch(`${BASE_URL}/listing/update-listing/${listingId}`, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
+        // "Content-Type": "multipart/form-data",
       },
-      body: JSON.stringify(listing),
+      body: formData,
     });
 
-    console.log(listing)
+    console.log(formData)
 
     if (!response.ok) {
       throw new Error(`Failed to update listing: ${response.statusText}`);
-    }
-
-    // If there are image files to upload, handle them separately
-    if (imageFiles && imageFiles.length > 0) {
-      const formData = new FormData();
-      
-      // Append each image file to the form data
-      imageFiles.forEach((file, index) => {
-        formData.append(`images`, file);
-      });
-
-      console.log(imageFiles)
-
-      // Send the images to a separate endpoint or with a different request
-      const imageResponse = await fetch(`${BASE_URL}/listings/${listingId}/images`, {
-        method: "POST", // or "PUT" depending on your API
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          // Note: Don't set Content-Type header when using FormData
-        },
-        body: formData,
-      });
-
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to upload images: ${imageResponse.statusText}`);
-      }
     }
   } catch (error) {
     console.error("Error updating listing:", error);
@@ -303,7 +308,7 @@ export const markAsSoldListing = async (listingId: string): Promise<void> => {
     headers: authHeaders(),
   })
 
-  console.log(listingId)
+  // console.log(listingId)
   if (!response.ok) {
     throw new Error("Failed to mark listing as sold")
   }
@@ -355,17 +360,25 @@ export const getWishlist = async (): Promise<ListingType[]> => {
   return allListings;
 }
 
-// Mock API functions for features not yet implemented in the backend
-export const getUserWishlist = (userId: string): ListingType[] => {
-  // This is a mock function until the backend implements wishlist functionality
-  return []
+export const getNotifications = async(): Promise<NotificationType[]> => {
+  const response = await fetch(`${BASE_URL}/notification/get-all-notifications`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch notifications")
+  }
+  const data = await response.json()
+  return data;
 }
 
-export const getNotificationsClient = async (): Promise<any[]> => {
-  // This is a mock function until the backend implements notifications
-  return []
-}
+export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/notification/mark-as-read/${notificationId}`, {
+    method: "PUT",
+    headers: authHeaders(),
+  })
 
-export const markNotificationAsReadClient = async (notificationId: string): Promise<void> => {
-  // This is a mock function until the backend implements notifications
+  if (!response.ok) {
+    throw new Error("Failed to mark notification as read")
+  }
+  // console.log(response)
 }

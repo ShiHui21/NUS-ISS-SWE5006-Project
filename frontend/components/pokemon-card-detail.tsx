@@ -3,28 +3,28 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { X, Heart, ChevronLeft, ChevronRight } from "lucide-react"
+import { X, Heart, HeartOff, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
 import { PlaceholderImage } from "@/components/placeholder-image"
-import { callAddToWishlist } from "@/lib/api-service"
+import { callAddToWishlist, callRemoveFromWishlist } from "@/lib/api-service"
 
 interface PokemonCardDetailProps {
   card: ListingType
   onClose: () => void
   showRemoveFromWishlist?: boolean
-  onRemoveFromWishlist?: () => void
+  // onRemoveFromWishlist?: () => void
 }
 
 export function PokemonCardDetail({
   card,
   onClose,
   showRemoveFromWishlist = false,
-  onRemoveFromWishlist,
+  // onRemoveFromWishlist,
 }: PokemonCardDetailProps) {
-  const [isInWishlist, setIsInWishlist] = useState(false)
+  const [isInWishlist, setIsInWishlist] = useState(showRemoveFromWishlist)
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const { toast } = useToast()
@@ -99,6 +99,27 @@ export function PokemonCardDetail({
       toast({
         title: "Error",
         description: "Failed to add to wishlist. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const removeFromWishlist = async () => {
+    try {
+      // Call the API service function to add to wishlist
+      await callRemoveFromWishlist(card.id)
+
+      setIsInWishlist(false)
+
+      toast({
+        title: "Removed from Wishlist",
+        description: "The card has been removed from your wishlist.",
+      })
+    } catch (error) {
+      console.error("Failed to remove from wishlist:", error)
+      toast({
+        title: "Error",
+        description: "Failed to remove from wishlist. Please try again.",
         variant: "destructive",
       })
     }
@@ -257,24 +278,25 @@ export function PokemonCardDetail({
               {/* <p className="text-gray-600 mt-1">Region: {card.region}</p> */}
             </div>
 
-            {card.listingStatus!=="Sold" && !showRemoveFromWishlist && (
+            {card.listingStatus!=="Sold" && !isInWishlist && (
               <Button
                 onClick={addToWishlist}
-                disabled={isInWishlist}
+                // disabled={isInWishlist}
                 className={`mt-auto ${isInWishlist ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"} text-white`}
               >
                 <Heart className="mr-2 h-4 w-4" />
-                {isInWishlist ? "Added to Wishlist" : "Add to Wishlist"}
+                {/* {isInWishlist ? "Added to Wishlist" : "Add to Wishlist"} */}
+                Add to wishlist
               </Button>
             )}
 
-            {showRemoveFromWishlist && onRemoveFromWishlist && (
+            {card.listingStatus!=="Sold" && isInWishlist && (
               <Button
-                onClick={onRemoveFromWishlist}
+                onClick={removeFromWishlist}
                 variant="outline"
                 className="mt-auto border-red-300 text-red-600 hover:bg-red-50"
               >
-                <Heart className="mr-2 h-4 w-4" />
+                <HeartOff className="mr-2 h-4 w-4" />
                 Remove from Wishlist
               </Button>
             )}
