@@ -21,8 +21,8 @@ jobs:
         distribution: 'temurin'
 
     - name: Build with Maven
-      # run: mvn clean package -DskipTests
-      run: mvn clean package
+      run: mvn clean package -DskipTests
+      # run: mvn clean package
       working-directory: backend
 
     - name: Copy JAR to EC2
