@@ -32,9 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,13 +43,17 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final CartItemRepository cartItemRepository;
     private final NotificationService notificationService;
+    private final CartService cartService;
+    private final ListingSearchService listingSearchService;
     private final S3Service s3Service;
 
-    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository, S3Service s3Service) {
+    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository, CartService cartService, ListingSearchService listingSearchService, S3Service s3Service) {
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
         this.cartItemRepository = cartItemRepository;
         this.notificationService = notificationService;
+        this.cartService = cartService;
+        this.listingSearchService = listingSearchService;
         this.s3Service = s3Service;
     }
 
@@ -84,8 +86,20 @@ public class ListingService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Listing created successfully");
     }
 
-    public ResponseEntity<String> updateListing(UUID listingId, UUID id, UpdateListingDTO updateListingDTO) {
+    public ResponseEntity<String> updateListing(UUID listingId, UUID id, UpdateListingDTO updateListingDTO, List<MultipartFile> newImageFiles) {
         System.out.println("Inside updateUser method");
+
+        List<MultipartFile> filteredFiles = newImageFiles.stream()
+                .filter(file -> !file.isEmpty())
+                .collect(Collectors.toList());
+
+        if (filteredFiles.isEmpty() && updateListingDTO.getImages().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("At least one image must be provided.");
+        }
+
+        System.out.println("Images received from DTO:");
+        updateListingDTO.getImages().forEach(System.out::println);
+
         Listing listing = listingRepository.findById(listingId).orElseThrow(() -> new EntityNotFoundException("Listing not found"));
 
         List<String> changes = new ArrayList<>();
@@ -125,8 +139,26 @@ public class ListingService {
             changes.add("Price");
         }
 
-        if(ChangeTrackerUtil.hasChanged(listing.getImages(),updateListingDTO.getImages())) {
-            listing.setImages(updateListingDTO.getImages());
+        List<String> finalImageUrls = new ArrayList<>();
+        if (updateListingDTO.getImages() != null) {
+            finalImageUrls.addAll(updateListingDTO.getImages()); // Retained image URLs
+        }
+
+        if (filteredFiles != null && !filteredFiles.isEmpty()) {
+            // Upload files to S3 and get URLs
+            for (MultipartFile file : filteredFiles) {
+                String imageUrl = s3Service.uploadFile(file);
+                finalImageUrls.add(imageUrl);
+            }
+        }
+
+        System.out.println("Final image URLs to be saved:");
+        for (String url : finalImageUrls) {
+            System.out.println(url);
+        }
+
+        if(ChangeTrackerUtil.hasChanged(listing.getImages(),finalImageUrls)) {
+            listing.setImages(finalImageUrls);
             changes.add("Images");
         }
 
@@ -201,48 +233,31 @@ public class ListingService {
 
     public GetListingsDTO getListings(@RequestBody GetListingFilterDTO filter, UUID userId) {
 
-        List<SearchStrategy> strategies = new ArrayList<>();
+        Page<Listing> listingsPage = listingSearchService.searchListings(filter, userId);
 
-        if (filter.getUsername() != null) {
-            strategies.add(new UsernameSearchStrategy());
-        }
-
-        if (filter.getMinPrice() != null || filter.getMaxPrice() != null ||
-                filter.getConditions() != null || filter.getListingStatuses() != null ||
-                filter.getRarities() != null || filter.getRegions() != null || filter.getTitle() != null) {
-            strategies.add(new FilterSearchStrategy());
-        }
-
-        strategies.add(new UserExclusionStrategy(userId, filter.isExcludeCurrentUser()));
-
-        Specification<Listing> spec = Specification.where(null);
-        for (SearchStrategy strategy : strategies) {
-            Specification<Listing> strategySpec = strategy.searchSpecifications(filter);
-            if (strategySpec != null) {
-                spec = spec.and(strategySpec);
-            }
-        }
-
-        String sortBy = filter.getSortBy() != null ? filter.getSortBy() :"createdOn";
-        String sortOrder = filter.getSortOrder() != null ? filter.getSortOrder() : "asc";
-        int currPage = Integer.parseInt(filter.getPage() != null ? filter.getPage() : "0");
-        int currSize = Integer.parseInt(filter.getSize() != null ? filter.getSize() : "100");
-        Sort sort = createSort(sortBy, sortOrder);
-
-        PageRequest pageRequest = PageRequest.of(currPage, currSize, sort);
-
-        Page<Listing> listingsPage = listingRepository.findAll(spec, pageRequest);
+        Set<UUID> cartListingIds = filter.isExcludeCurrentUser()
+                ? cartService.getCartListingIds(userId)
+                : Collections.emptySet();
 
         List<GetListingSummaryDTO> listingSummaries = listingsPage.getContent().stream()
-                .map(listing -> new GetListingSummaryDTO(listing))
+                .map(listing -> {
+                    boolean isInCart = cartListingIds.contains(listing.getId());
+
+                    // Only set `isInCart` when it's not the user's own listing (exclude current user's listings)
+                    if (filter.isExcludeCurrentUser() && listing.getSeller().getId().equals(userId)) {
+                        isInCart = false; // Don't set `isInCart` for the current user's own listings
+                    }
+
+                    return new GetListingSummaryDTO(listing, isInCart); // Create DTO with isInCart field
+                })
                 .collect(Collectors.toList());
 
         GetListingsDTO getListingsDTO = new GetListingsDTO();
-        getListingsDTO.setListings(listingSummaries);
         getListingsDTO.setTotalElements(listingsPage.getTotalElements());
         getListingsDTO.setTotalPages(listingsPage.getTotalPages());
         getListingsDTO.setCurrentPage(listingsPage.getNumber());
         getListingsDTO.setPageSize(listingsPage.getSize());
+        getListingsDTO.setListings(listingSummaries);
 
         return getListingsDTO;
     }
@@ -261,23 +276,5 @@ public class ListingService {
         };
     }
 
-    private Sort createSort(String sortBy, String sortOrder) {
-        if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "createdOn"; // Default
-        }
 
-        if (sortOrder == null || sortOrder.isEmpty()) {
-            sortOrder = "asc";
-        }
-
-        boolean ascending = sortOrder.equalsIgnoreCase("asc");
-        String sortField = switch (sortBy.toLowerCase()) {
-            case "price" -> "price";
-            case "rarity" -> "rarity";
-            case "condition" -> "condition";
-            default -> "createdOn";
-        };
-
-        return ascending ? Sort.by(Sort.Order.asc(sortField)) : Sort.by(Sort.Order.desc(sortField));
-    }
 }

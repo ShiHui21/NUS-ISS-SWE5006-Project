@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -68,13 +69,18 @@ public class CartService {
         Cart cart = cartRepository.findByUser_Id(userId).orElseThrow(() -> new EntityNotFoundException("Cart is not found"));
 
         List<CartItem> cartItems = cart.getItems();
+        CartItem toRemove = null;
 
         for(CartItem item : cartItems) {
-            if(item.getListing().getId().equals(listingId)) {
-                cartItems.remove(item);
-                cartRepository.save(cart); //Doing this will automatically delete the cartItem from database because of cascade
-                return ResponseEntity.status(HttpStatus.FOUND).body("Listing has been deleted");
+            if (item.getListing().getId().equals(listingId)) {
+                toRemove = item;
+                break;
             }
+        }
+        if (toRemove != null) {
+            cartItems.remove(toRemove);
+            cartRepository.save(cart); // cascade should handle deletion of CartItem
+            return ResponseEntity.status(HttpStatus.OK).body("Listing has been removed from the cart.");
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Listing is not found in Cart item");
@@ -98,6 +104,8 @@ public class CartService {
                 cartItemDTO.setMainImage(listing.getImages().isEmpty() ? null : listing.getImages().get(0));
                 cartItemDTO.setPrice(listing.getPrice());
                 cartItemDTO.setCardCondition(listing.getCardCondition().getCardConditionDisplayName());
+                cartItemDTO.setRarity(listing.getRarity().getRarityDisplayName());
+                cartItemDTO.setListingStatus(listing.getListingStatus().getListingStatusDisplayName());
                 return cartItemDTO;
             }).collect(Collectors.toList());
 
@@ -108,5 +116,15 @@ public class CartService {
         }).collect(Collectors.toList());
 
         return cartItemsResult;
+    }
+
+    public Set<UUID> getCartListingIds(UUID userId) {
+        Cart cart = cartRepository.findByUser_Id(userId).orElseThrow(() -> new EntityNotFoundException("Cart is not found"));
+
+        List<CartItem> cartItems = cart.getItems();
+
+        return cartItems.stream()
+                .map(cartItem -> cartItem.getListing().getId())  // Get the UUID from the Listing of each CartItem
+                .collect(Collectors.toSet());  // Collect them into a Set of UUIDs
     }
 }
