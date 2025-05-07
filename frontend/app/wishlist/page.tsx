@@ -34,6 +34,7 @@ export default function WishlistPage() {
       try {
         const wishlistItems = await getWishlist()
         setWishlist(wishlistItems)
+        console.log("wishlist items", wishlistItems)
       } catch (error) {
         console.error("Failed to fetch wishlist:", error)
         toast({

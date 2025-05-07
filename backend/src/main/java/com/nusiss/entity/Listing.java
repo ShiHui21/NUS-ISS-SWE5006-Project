@@ -50,6 +50,10 @@ public class Listing {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdOn;
 
+    private int conditionPriority;
+
+    private int rarityPriority;
+
     @PrePersist
     public void prePersist() {
         if (createdOn == null) {
@@ -65,7 +69,7 @@ public class Listing {
 
     public CardCondition getCardCondition() { return cardCondition; }
 
-    public void setCardCondition(CardCondition cardCondition) { this.cardCondition = cardCondition; }
+    public void setCardCondition(CardCondition cardCondition) { this.cardCondition = cardCondition; this.conditionPriority = cardCondition.ordinal(); }
 
     public CardType getCardType() { return cardType; }
 
@@ -73,7 +77,7 @@ public class Listing {
 
     public Rarity getRarity() { return rarity; }
 
-    public void setRarity(Rarity rarity) { this.rarity = rarity; }
+    public void setRarity(Rarity rarity) { this.rarity = rarity; this.rarityPriority = rarity.ordinal(); }
 
     public ListingStatus getListingStatus() { return listingStatus; }
 

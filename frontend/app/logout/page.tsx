@@ -47,7 +47,7 @@ export default function LogoutPage() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-yellow-500 drop-shadow-md">
-            <span className="text-blue-500">Poké</span>Trade
+            {/* <span className="text-blue-500">Poké</span>Trade */}
           </h1>
         </div>
 

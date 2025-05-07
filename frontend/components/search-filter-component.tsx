@@ -43,10 +43,10 @@ const sortOptions: FilterOption[] = [
   { value: "default", label: "Default Sort" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "rarity-asc", label: "Rarity: Hyper Rare to Common" },
-  { value: "rarity-desc", label: "Rarity: Common to Hyper Rare" },
-  { value: "condition-asc", label: "Condition: Damaged to Brand New" },
-  { value: "condition-desc", label: "Condition: Brand New to Damaged" },
+  { value: "rarityPriority-asc", label: "Rarity: Hyper Rare to Common" },
+  { value: "rarityPriority-desc", label: "Rarity: Common to Hyper Rare" },
+  { value: "conditionPriority-asc", label: "Condition: Damaged to Brand New" },
+  { value: "conditionPriority-desc", label: "Condition: Brand New to Damaged" },
 ]
 
 const rarityOptions: FilterOption[] = [

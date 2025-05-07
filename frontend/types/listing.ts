@@ -12,4 +12,5 @@ export interface ListingType {
   sellerName: string
   sellerRegion: string
   listingStatus: string
+  inCart: boolean
 }

@@ -157,13 +157,13 @@ export default function ProfilePage() {
     try {
       // Fetch active listings with filters
       const activeResult = await getFilteredListings({
-        title: filters.searchQuery || undefined,
+        listingTitle: filters.searchQuery || undefined,
         minPrice: filters.minPrice ? Number.parseFloat(filters.minPrice) : undefined,
         maxPrice: filters.maxPrice ? Number.parseFloat(filters.maxPrice) : undefined,
         listingStatuses: ["Active"],
         rarities: filters.rarities.length > 0 ? filters.rarities : undefined,
         conditions: filters.cardConditions.length > 0 ? filters.cardConditions : undefined,
-        cardType: filters.cardTypes.length > 0 ? filters.cardTypes : undefined,
+        cardTypes: filters.cardTypes.length > 0 ? filters.cardTypes : undefined,
         // Only fetch the current user's listings
         username: userProfile.username,
         excludeCurrentUser: false,

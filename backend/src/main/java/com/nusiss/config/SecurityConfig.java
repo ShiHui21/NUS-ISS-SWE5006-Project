@@ -42,7 +42,7 @@ public class SecurityConfig {
 //                        authorize.anyRequest().permitAll())
 //                .build();
 //    }
-//
+
 //    @Bean
 //    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        http
