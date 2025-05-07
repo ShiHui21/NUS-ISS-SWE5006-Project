@@ -43,43 +43,43 @@ public class SecurityConfig {
 //                .build();
 //    }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated())
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-
 //    @Bean
 //    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        http
-//            // Enforce HTTPS
-//            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
-//
-//            // Enable CORS and disable CSRF
 //            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 //            .csrf(csrf -> csrf.disable())
-//
-//            // Authorization config
 //            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers("/auth/**").permitAll()
+//                    .requestMatchers("/auth/**").permitAll()
 //                .anyRequest().authenticated())
-//
-//            // Stateless session
 //            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 //
-//        // Add JWT filter
 //        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//
 //        return http.build();
 //    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            // Enforce HTTPS
+            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+
+            // Enable CORS and disable CSRF
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+
+            // Authorization config
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated())
+
+            // Stateless session
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // Add JWT filter
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
