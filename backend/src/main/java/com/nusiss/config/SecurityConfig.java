@@ -61,7 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             // Enforce HTTPS
-            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+//            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
             // Enable CORS and disable CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -69,7 +69,7 @@ public class SecurityConfig {
 
             // Authorization config
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/").permitAll()
                 .anyRequest().authenticated())
 
             // Stateless session
