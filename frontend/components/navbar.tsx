@@ -48,9 +48,10 @@ export function Navbar() {
   const handleNotificationClick = async (id: string) => {
     try {
       await markNotificationAsRead(id)
-      setNotifications((prev) =>
-        prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
-      )
+      // setNotifications((prev) =>
+      //   prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
+      // )
+      setNotifications((prev) => prev.filter((notification) => notification.id !== id))
     } catch (error) {
       console.error("Failed to mark notification as read:", error)
     }

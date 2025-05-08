@@ -175,6 +175,7 @@ export const getFilteredListings = async (filters: {
       sellerRegion: listing.region,
       listingStatus: listing.listingStatus,
       inCart: listing.inCart,
+      listedOn: listing.listedOn,
     }))
 
     return {
@@ -353,7 +354,8 @@ export const getWishlist = async (): Promise<ListingType[]> => {
       cardCondition: item.cardCondition,
       rarity: item.rarity,
       price: item.price,
-      imageUrl: item.mainImage
+      imageUrl: item.mainImage,
+      listingStatus: item.listingStatus
     }))
   );
   // console.log(allListings)
