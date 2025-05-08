@@ -23,10 +23,10 @@ export default function LogoutPage() {
 
     logout()
 
-    toast({
-      title: "Logged Out Successfully",
-      description: "You have been logged out of your account.",
-    })
+    // toast({
+    //   title: "Logged Out Successfully",
+    //   description: "You have been logged out of your account.",
+    // })
   }, [toast])
 
   const handleLoginAgain = () => {

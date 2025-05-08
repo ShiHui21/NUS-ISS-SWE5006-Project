@@ -79,11 +79,11 @@ export default function ExplorePage() {
       })
     } catch (error) {
       console.error("Failed to fetch listings:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load listings. Please try again.",
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to load listings. Please try again.",
+      //   variant: "destructive",
+      // })
       setListings([]) // Set to empty array on error
     } finally {
       setLoading(false)

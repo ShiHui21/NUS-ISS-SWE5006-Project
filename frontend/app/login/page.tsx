@@ -56,7 +56,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <span className="text-4xl font-bold text-blue-600 animate-bounce-slow">
-              Poké<span className="text-yellow-500">Trade</span>
+              Poké<span className="text-yellow-500">SWAP</span>
             </span>
           </div>
           {/* <h1 className="text-3xl font-bold text-yellow-500 drop-shadow-md">

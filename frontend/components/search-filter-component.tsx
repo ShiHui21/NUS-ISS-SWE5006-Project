@@ -335,7 +335,7 @@ export function SearchFilterComponent({
 
             {/* Card Type Dropdown */}
             {showCardTypeFilter && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:col-span-3">
               <Label className="whitespace-nowrap w-16">Card Type:</Label>
               <Popover>
                 <PopoverTrigger asChild>
