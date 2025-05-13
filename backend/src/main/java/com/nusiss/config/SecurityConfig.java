@@ -37,7 +37,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // CSRF is explicitly disabled for stateless applications
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated())
