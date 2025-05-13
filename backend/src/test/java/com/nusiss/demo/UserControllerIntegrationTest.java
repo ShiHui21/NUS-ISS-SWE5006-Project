@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nusiss.config.AuthenticateUser;
 import com.nusiss.dto.CreateUserDTO;
 import com.nusiss.dto.GetUserDetailsDTO;
+import com.nusiss.dto.UpdatePasswordDTO;
 import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
 import com.nusiss.enums.Region;
@@ -110,5 +111,44 @@ public class UserControllerIntegrationTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(
                         new GetUserDetailsDTO(user)
                 )));
+    }
+
+    @Test
+    void updatePassword_success() throws Exception {
+        User user = userRepository.findByUsernameIgnoreCase("existingUsername").orElseThrow();
+
+        UpdatePasswordDTO dto = new UpdatePasswordDTO("Password1234!", "NewPassword5678!");
+
+        mockMvc.perform(put("/user/update-password")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Password updated successfully"));
+    }
+
+    @Test
+    void updatePassword_validationFailure_newPasswordBlank() throws Exception {
+        UpdatePasswordDTO dto = new UpdatePasswordDTO();
+        dto.setCurrentPassword("Password1234!");
+        dto.setNewPassword(""); // This should trigger @NotBlank validation
+
+        mockMvc.perform(put("/user/update-password")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("New password is required")));
+    }
+
+    @Test
+    void updatePassword_validationFailure_oldPasswordBlank() throws Exception {
+        UpdatePasswordDTO dto = new UpdatePasswordDTO();
+        dto.setCurrentPassword("");
+        dto.setNewPassword("NewPassword5678!"); // This should trigger @NotBlank validation
+
+        mockMvc.perform(put("/user/update-password")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Current password is required")));
     }
 }

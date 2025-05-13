@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@RequestBody @Valid UpdatePasswordDTO updatePasswordDTO, @AuthenticationPrincipal
-AuthenticateUser authenticateUser, BindingResult bindingResult) {
+    public ResponseEntity<String> updatePassword(@RequestBody @Valid UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, @AuthenticationPrincipal
+AuthenticateUser authenticateUser) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMessages = new StringBuilder();
             for (ObjectError error : bindingResult.getAllErrors()) {
