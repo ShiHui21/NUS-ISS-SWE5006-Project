@@ -127,4 +127,5 @@ public class CartService {
                 .map(cartItem -> cartItem.getListing().getId())  // Get the UUID from the Listing of each CartItem
                 .collect(Collectors.toSet());  // Collect them into a Set of UUIDs
     }
+
 }

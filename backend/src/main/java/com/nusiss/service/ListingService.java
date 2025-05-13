@@ -181,19 +181,13 @@ public class ListingService {
         for (CartItem cartItem : cartItems) {
             User user = cartItem.getCart().getUser();  // Get the user who saved the listing
 
+            notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+            // Try real-time notification
+            notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
 
-            try {
-                // Try real-time notification
-                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            } catch (IOException e) {
-                // WebSocket is closed or user is offline
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            }
-
-            // Mark the cart item as notified
-            cartItem.setNotifiedStatus();
-            cartItemRepository.save(cartItem);
+//            // Mark the cart item as notified
+//            cartItem.setNotifiedStatus();
+//            cartItemRepository.save(cartItem);
         }
 
         return ResponseEntity.ok("Listing marked as sold");
@@ -214,19 +208,13 @@ public class ListingService {
         for (CartItem cartItem : cartItems) {
             User user = cartItem.getCart().getUser();  // Get the user who saved the listing
 
+            notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
+            // Try real-time notification
+            notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
 
-            try {
-                // Try real-time notification
-                notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            } catch (IOException e) {
-                // WebSocket is closed or user is offline
-                notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            }
-
-            // Mark the cart item as notified
-            cartItem.setNotifiedStatus();
-            cartItemRepository.save(cartItem);
+//            // Mark the cart item as notified
+//            cartItem.setNotifiedStatus();
+//            cartItemRepository.save(cartItem);
         }
 
 //        listingRepository.delete(listing);

@@ -64,7 +64,7 @@ public class NotificationService {
     }
 
     // Send real-time notification to an online user
-    public void sendRealTimeNotification(User user, String message) throws IOException{
+    public void sendRealTimeNotification(User user, String message) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> payload = new HashMap<>();
@@ -79,7 +79,7 @@ public class NotificationService {
         } catch (IOException e) {
             // If WebSocket is unavailable (i.e., the user is offline), save the notification in the database
             System.out.println("Error sending WebSocket notification");
-            throw e; // Let the calling method handle saving to DB fallback
+//            throw e; // Let the calling method handle saving to DB fallback
         }
     }
 }
