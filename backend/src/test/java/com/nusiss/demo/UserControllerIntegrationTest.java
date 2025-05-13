@@ -2,6 +2,8 @@ package com.nusiss.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nusiss.config.AuthenticateUser;
+import com.nusiss.dto.CreateUserDTO;
+import com.nusiss.dto.GetUserDetailsDTO;
 import com.nusiss.dto.UpdateUserDetailsDTO;
 import com.nusiss.entity.User;
 import com.nusiss.enums.Region;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,5 +98,17 @@ public class UserControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateUserDetailsDTO)))
                 .andExpect(status().isConflict())  // Expecting 409 Conflict for duplicate username
                 .andExpect(content().string("Username is already in use!"));  // Expecting error message for duplicate username
+    }
+
+    @Test
+    void getUser_successFlow() throws Exception {
+        User user = userRepository.findByUsernameIgnoreCase("existingUsername").orElseThrow();
+
+        mockMvc.perform(get("/user/get-details")
+                        .contentType("application/json"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(
+                        new GetUserDetailsDTO(user)
+                )));
     }
 }
