@@ -11,6 +11,7 @@ import com.nusiss.enums.Rarity;
 import com.nusiss.patterns.factory.ListingFactory;
 import com.nusiss.patterns.factory.PokemonCardListingFactory;
 import com.nusiss.patterns.factory.TrainerCardListingFactory;
+import com.nusiss.patterns.observer.ListingSubject;
 import com.nusiss.repository.CartItemRepository;
 import com.nusiss.repository.ListingRepository;
 import com.nusiss.repository.UserRepository;
@@ -39,8 +40,18 @@ public class ListingService {
     private final CartService cartService;
     private final ListingSearchService listingSearchService;
     private final S3Service s3Service;
+    private final ListingSubject listingSubject;
 
-    public ListingService(UserRepository userRepository, ListingRepository listingRepository, NotificationService notificationService, CartItemRepository cartItemRepository, CartService cartService, ListingSearchService listingSearchService, S3Service s3Service) {
+    public ListingService(
+            UserRepository userRepository,
+            ListingRepository listingRepository,
+            NotificationService notificationService,
+            CartItemRepository cartItemRepository,
+            CartService cartService,
+            ListingSearchService listingSearchService,
+            S3Service s3Service,
+            ListingSubject listingSubject
+    ) {
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
         this.cartItemRepository = cartItemRepository;
@@ -48,6 +59,10 @@ public class ListingService {
         this.cartService = cartService;
         this.listingSearchService = listingSearchService;
         this.s3Service = s3Service;
+        this.listingSubject = listingSubject;
+
+        // 👇 Register the observer here
+        listingSubject.addObserver(notificationService);
     }
 
     public ResponseEntity<String> createListing(UUID id, CreateListingDTO createListingDTO, List<MultipartFile> imageFiles) {
@@ -176,19 +191,7 @@ public class ListingService {
         listing.setListingStatus(ListingStatus.SOLD);
         listingRepository.save(listing);
 
-        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
-
-        for (CartItem cartItem : cartItems) {
-            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
-
-            notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            // Try real-time notification
-            notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-
-//            // Mark the cart item as notified
-//            cartItem.setNotifiedStatus();
-//            cartItemRepository.save(cartItem);
-        }
+        listingSubject.notifyObservers(listing);
 
         return ResponseEntity.ok("Listing marked as sold");
     }
@@ -202,20 +205,9 @@ public class ListingService {
         }
 
         listing.setListingStatus(ListingStatus.DELETED);
+        listingRepository.save(listing);
 
-        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listingId);
-
-        for (CartItem cartItem : cartItems) {
-            User user = cartItem.getCart().getUser();  // Get the user who saved the listing
-
-            notificationService.createNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-            // Try real-time notification
-            notificationService.sendRealTimeNotification(user, "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!");
-
-//            // Mark the cart item as notified
-//            cartItem.setNotifiedStatus();
-//            cartItemRepository.save(cartItem);
-        }
+        listingSubject.notifyObservers(listing);
 
 //        listingRepository.delete(listing);
         return ResponseEntity.status(HttpStatus.OK).body("Listing successfully soft deleted");

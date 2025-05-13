@@ -4,9 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nusiss.config.NotificationWebSocketHandler;
 import com.nusiss.dto.GetListingSummaryDTO;
 import com.nusiss.dto.GetNotificationsDTO;
+import com.nusiss.entity.CartItem;
+import com.nusiss.entity.Listing;
 import com.nusiss.entity.Notification;
 import com.nusiss.entity.User;
+import com.nusiss.patterns.observer.ListingObserver;
+import com.nusiss.repository.CartItemRepository;
+import com.nusiss.repository.CartRepository;
 import com.nusiss.repository.NotificationRepository;
+import com.nusiss.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -22,14 +28,15 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class NotificationService {
+public class NotificationService implements ListingObserver {
 
     private final NotificationRepository notificationRepository;
-
+    private final CartItemRepository cartItemRepository;
     private final NotificationWebSocketHandler notificationWebSocketHandler;
 
-    NotificationService(NotificationRepository notificationRepository, NotificationWebSocketHandler notificationWebSocketHandler) {
+    NotificationService(NotificationRepository notificationRepository, CartItemRepository cartItemRepository, NotificationWebSocketHandler notificationWebSocketHandler) {
         this.notificationRepository = notificationRepository;
+        this.cartItemRepository = cartItemRepository;
         this.notificationWebSocketHandler = notificationWebSocketHandler;
     }
 
@@ -80,6 +87,19 @@ public class NotificationService {
             // If WebSocket is unavailable (i.e., the user is offline), save the notification in the database
             System.out.println("Error sending WebSocket notification");
 //            throw e; // Let the calling method handle saving to DB fallback
+        }
+    }
+
+    @Override
+    public void onListingSold(Listing listing) {
+        List<CartItem> cartItems = cartItemRepository.findByListing_Id(listing.getId());
+        for (CartItem cartItem : cartItems) {
+            User user = cartItem.getCart().getUser();
+
+            String message = "Listing: " + listing.getListingTitle() + " by " + listing.getSeller().getUsername() + " is no longer available!";
+            createNotification(user, message);
+            sendRealTimeNotification(user, message);
+            System.out.println(message);
         }
     }
 }
