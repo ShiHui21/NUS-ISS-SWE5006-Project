@@ -17,5 +17,10 @@ RUN mvn clean install
 # Expose port 8080 for the backend
 EXPOSE 8080
 
+# Create non-root user and set permissions
+RUN useradd -U -u 1000 appuser && \
+    chown -R 1000:1000 /app
+USER 1000
+
 # Command to run the Spring Boot application
 CMD ["java", "-jar", "target/my-backend-app.jar"]
