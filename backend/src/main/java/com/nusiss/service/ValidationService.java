@@ -24,6 +24,8 @@ public class ValidationService {
         this.userRepository = userRepository;
     }
 
+    private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d])(?!.*\\s).{8,}$"; // Enforces strong password
+
     public boolean isEmailValid(String email) {
 //        String emailRegex = "^[A-Za-z0-9+_.-]{6,30}@[A-Za-z0-9]{2,}(\\.[A-Za-z]{2,})+$";
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -51,8 +53,7 @@ public class ValidationService {
     }
 
     public boolean isPasswordValid(String password) {
-        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d])(?!.*\\s).{8,}$";
-        return password != null && password.matches(passwordRegex);
+        return password != null && password.matches(PASSWORD_REGEX);
     }
 
      public Map<String, String> validateUserInput(CreateUserDTO createUserDTO) {
