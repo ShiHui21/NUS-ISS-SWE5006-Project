@@ -26,7 +26,7 @@ jobs:
       working-directory: backend
 
     - name: Copy JAR to EC2
-      uses: appleboy/scp-action@v0.1.4
+      uses: appleboy/scp-action@8a92fcdb1eb4ffbf538b2fa286739760aac8a95b # v0.1.4
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
@@ -35,7 +35,7 @@ jobs:
         target: "/home/${{ secrets.EC2_USER }}/"
 
     - name: SSH and restart systemd service
-      uses: appleboy/ssh-action@v0.1.8
+      uses: appleboy/ssh-action@b60142998894e495c513803efc6d5d72a72c968a # v0.1.8
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
