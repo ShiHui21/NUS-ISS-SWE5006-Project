@@ -33,38 +33,16 @@ public class SecurityConfig {
         this.userService = userService;
     }
 
-//    @Bean
-//    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        return http
-//                .requiresChannel(channel ->
-//                        channel.anyRequest().requiresSecure())
-//                .authorizeRequests(authorize ->
-//                        authorize.anyRequest().permitAll())
-//                .build();
-//    }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//            .csrf(csrf -> csrf.disable())
-//            .authorizeHttpRequests(auth -> auth
-//                    .requestMatchers("/auth/**").permitAll()
-//                .anyRequest().authenticated())
-//            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             // Enforce HTTPS
-//            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+        //    .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
-            // Enable CORS and disable CSRF
+            // Enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // CSRF disabled because this is a stateless REST API using JWTs for auth.
+            // No cookies or sessions are used; CSRF protection is not applicable.
             .csrf(csrf -> csrf.disable())
 
             // Authorization config
