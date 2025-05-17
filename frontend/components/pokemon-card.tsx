@@ -11,10 +11,10 @@ import { PlaceholderImage } from "@/components/placeholder-image"
 interface PokemonCardProps {
   card: ListingType
   onClick: () => void
-  isInactive?: boolean
+  // isInactive?: boolean
 }
 
-export function PokemonCard({ card, onClick, isInactive = card.listingStatus==="Sold" || card.listingStatus==="Deleted" }: PokemonCardProps) {
+export function PokemonCard({ card, onClick }: PokemonCardProps) {
   const [imageError, setImageError] = useState(false)
 
   // Updated to handle the new rarity values
@@ -48,7 +48,7 @@ export function PokemonCard({ card, onClick, isInactive = card.listingStatus==="
       onClick={onClick}
       className="cursor-pointer"
     >
-      <Card className={`overflow-hidden shadow-md transition-all duration-300 ${isInactive ? "opacity-70" : ""}`}>
+      <Card className={`overflow-hidden shadow-md transition-all duration-300 ${card.listingStatus!=="Active" ? "opacity-70" : ""}`}>
         <div className="relative">
           {/* {imageError || !card.imageUrl ? (
             <PlaceholderImage

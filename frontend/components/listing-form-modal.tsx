@@ -154,61 +154,7 @@ export function ListingFormModal({ onClose, onSubmit, listing, mode }: ListingFo
           <h2 className="text-2xl font-bold text-blue-700 mb-6">{modalTitle}</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Card Title</Label>
-              <Input
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Charizard Holo 1st Edition"
-                required
-                className="border-gray-200 focus:border-blue-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Describe your card's details, history, and any special features..."
-                required
-                className="min-h-[100px] resize-none border-gray-200 focus:border-blue-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cardType">Card Type</Label>
-              <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
-                <SelectTrigger id="cardType" className="border-gray-200">
-                  <SelectValue placeholder="Select Card Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
-                  <SelectItem value="Trainer Card">Trainer Card</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">Price ($)</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="29.99"
-                required
-                className="border-gray-200 focus:border-blue-300"
-              />
-            </div>
-
-            <div className="space-y-2">
+          <div className="space-y-2">
               <Label>Main Image</Label>
               {mainImage ? (
                 <div className="relative rounded-md overflow-hidden">
@@ -294,6 +240,47 @@ export function ListingFormModal({ onClose, onSubmit, listing, mode }: ListingFo
               <p className="text-xs text-gray-500">You can add up to 5 additional images</p>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="title">Card Title</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Charizard Holo 1st Edition"
+                required
+                className="border-gray-200 focus:border-blue-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cardType">Card Type</Label>
+              <Select value={formData.cardType} onValueChange={(value) => handleSelectChange("cardType", value)}>
+                <SelectTrigger id="cardType" className="border-gray-200">
+                  <SelectValue placeholder="Select Card Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pokemon Card">Pokemon Card</SelectItem>
+                  <SelectItem value="Trainer Card">Trainer Card</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Price ($)</Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="29.99"
+                required
+                className="border-gray-200 focus:border-blue-300"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rarity">Rarity</Label>
@@ -329,6 +316,19 @@ export function ListingFormModal({ onClose, onSubmit, listing, mode }: ListingFo
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Describe your card's details, history, and any special features..."
+                required
+                className="min-h-[100px] resize-none border-gray-200 focus:border-blue-300"
+              />
             </div>
 
             <div className="flex gap-2 pt-4">

@@ -3,28 +3,28 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { X, Heart, ChevronLeft, ChevronRight } from "lucide-react"
+import { X, Heart, HeartOff, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { ListingType } from "@/types/listing"
 import { useToast } from "@/components/ui/use-toast"
 import { PlaceholderImage } from "@/components/placeholder-image"
-import { callAddToWishlist } from "@/lib/api-service"
+import { callAddToWishlist, callRemoveFromWishlist } from "@/lib/api-service"
 
 interface PokemonCardDetailProps {
   card: ListingType
   onClose: () => void
   showRemoveFromWishlist?: boolean
-  onRemoveFromWishlist?: () => void
+  // onRemoveFromWishlist?: () => void
 }
 
 export function PokemonCardDetail({
   card,
   onClose,
   showRemoveFromWishlist = false,
-  onRemoveFromWishlist,
+  // onRemoveFromWishlist,
 }: PokemonCardDetailProps) {
-  const [isInWishlist, setIsInWishlist] = useState(false)
+  const [isInWishlist, setIsInWishlist] = useState(showRemoveFromWishlist)
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const { toast } = useToast()
@@ -99,6 +99,27 @@ export function PokemonCardDetail({
       toast({
         title: "Error",
         description: "Failed to add to wishlist. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const removeFromWishlist = async () => {
+    try {
+      // Call the API service function to add to wishlist
+      await callRemoveFromWishlist(card.id)
+
+      setIsInWishlist(false)
+
+      toast({
+        title: "Removed from Wishlist",
+        description: "The card has been removed from your wishlist.",
+      })
+    } catch (error) {
+      console.error("Failed to remove from wishlist:", error)
+      toast({
+        title: "Error",
+        description: "Failed to remove from wishlist. Please try again.",
         variant: "destructive",
       })
     }
@@ -234,51 +255,95 @@ export function PokemonCardDetail({
             )}
           </div>
 
-          <div className="flex flex-col">
-            <h2 className="text-2xl font-bold text-blue-700 mb-2">{card.title}</h2>
-
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge className={rarityColor}>{card.rarity}</Badge>
-              <Badge className={conditionColor}>{card.condition}</Badge>
+          {/* Right column - Details */}
+          <div className="flex flex-col space-y-6">
+            {/* Title and Price */}
+            <div>
+              <h2 className="text-2xl font-bold text-blue-600">{card.title}</h2>
+              <div className="text-2xl font-bold text-yellow-600 mt-2">${card.price.toFixed(2)}</div>
             </div>
 
-            <div className="text-3xl font-bold text-yellow-600 mb-4">${card.price}</div>
-
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-600 mb-2">Description</h3>
-              <p className="text-gray-700">{card.description}</p>
-            </div>
-
-            <div className="mb-6">
+            {/* Seller Information */}
+            <div>
               <h3 className="text-lg font-semibold text-blue-600 mb-2">Seller Information</h3>
-              <Link href={`/seller/${card.sellerId}`} className="text-blue-500 hover:underline font-medium">
-                {card.sellerName}
-              </Link>
-              {/* <p className="text-gray-600 mt-1">Region: {card.region}</p> */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
+                  {card.sellerName ? card.sellerName.charAt(0).toUpperCase() : "S"}
+                </div>
+                <div>
+                  <Link href={`/seller/${card.sellerId}`} className="text-blue-500 hover:underline font-medium">
+                    {card.sellerName}
+                  </Link>
+                  <p className="text-gray-600 text-sm">Region: {card.sellerRegion}</p>
+                </div>
+              </div>
             </div>
 
-            {card.listingStatus!=="Sold" && !showRemoveFromWishlist && (
-              <Button
-                onClick={addToWishlist}
-                disabled={isInWishlist}
-                className={`mt-auto ${isInWishlist ? "bg-gray-300" : "bg-blue-600 hover:bg-blue-700"} text-white`}
-              >
-                <Heart className="mr-2 h-4 w-4" />
-                {isInWishlist ? "Added to Wishlist" : "Add to Wishlist"}
-              </Button>
-            )}
+            {/* Card Details */}
+            <div>
+              <h3 className="text-lg font-semibold text-blue-600 mb-2">Card Details</h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {card.rarity && <Badge className={getRarityColor(card.rarity)}>{card.rarity}</Badge>}
+                {(card.condition) && (
+                  <Badge className={getConditionColor(card.condition)}>
+                    {card.condition}
+                  </Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-y-2">
+                <div>
+                  <p className="text-sm text-gray-500">Card Type</p>
+                  <p className="text-gray-700">{card.cardType}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Listed On</p>
+                  <p className="text-gray-700">
+                    {card.listedOn
+                      ? new Date(card.listedOn).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "Recently"}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-            {showRemoveFromWishlist && onRemoveFromWishlist && (
-              <Button
-                onClick={onRemoveFromWishlist}
-                variant="outline"
-                className="mt-auto border-red-300 text-red-600 hover:bg-red-50"
-              >
-                <Heart className="mr-2 h-4 w-4" />
-                Remove from Wishlist
-              </Button>
-            )}
+            {/* Description */}
+            <div>
+              <h3 className="text-lg font-semibold text-blue-600 mb-2">Description</h3>
+              <p className="text-gray-700">{card.description || "No description provided."}</p>
+            </div>
+
+            {/* Wishlist Button */}
+            <div className="mt-auto pt-2">
+              {card.listingStatus !== "Sold" && !isInWishlist && (
+                <Button onClick={addToWishlist} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Heart className="mr-2 h-4 w-4" />
+                  Add to wishlist
+                </Button>
+              )}
+
+              {card.listingStatus !== "Sold" && isInWishlist && (
+                <Button
+                  onClick={removeFromWishlist}
+                  variant="outline"
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <HeartOff className="mr-2 h-4 w-4" />
+                  Remove from wishlist
+                </Button>
+              )}
+
+              {card.listingStatus === "Sold" && (
+                <p className="text-red-600 text-center font-medium">
+                  This card has been sold and is no longer available.
+                </p>
+              )}
+            </div>
           </div>
+          
         </div>
       </div>
     </div>

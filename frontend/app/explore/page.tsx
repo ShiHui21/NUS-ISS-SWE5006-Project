@@ -39,7 +39,7 @@ export default function ExplorePage() {
       // Convert frontend filter values to backend expected values
       const backendFilters: any = {
         excludeCurrentUser: true,
-        title: currentFilters.searchQuery || undefined,
+        listingTitle: currentFilters.searchQuery || undefined,
         minPrice: currentFilters.minPrice ? Number.parseFloat(currentFilters.minPrice) : undefined,
         maxPrice: currentFilters.maxPrice ? Number.parseFloat(currentFilters.maxPrice) : undefined,
         listingStatuses: ["Active"],
@@ -70,6 +70,7 @@ export default function ExplorePage() {
 
       const result = await getFilteredListings(backendFilters)
       setListings(result.listings)
+      console.log(result.listings)
       setPagination({
         totalElements: result.totalElements,
         totalPages: result.totalPages,
@@ -78,11 +79,11 @@ export default function ExplorePage() {
       })
     } catch (error) {
       console.error("Failed to fetch listings:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load listings. Please try again.",
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to load listings. Please try again.",
+      //   variant: "destructive",
+      // })
       setListings([]) // Set to empty array on error
     } finally {
       setLoading(false)
@@ -167,7 +168,7 @@ export default function ExplorePage() {
       </main>
 
       {/* Card Detail Modal */}
-      {selectedCard && <PokemonCardDetail card={selectedCard} onClose={() => setSelectedCard(null)} />}
+      {selectedCard && <PokemonCardDetail card={selectedCard} onClose={() => setSelectedCard(null)} showRemoveFromWishlist={selectedCard.inCart}/>}
     </div>
   )
 }

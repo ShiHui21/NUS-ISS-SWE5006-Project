@@ -36,21 +36,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // Enforce HTTPS
+        //    .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+
+            // Enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable()) // CSRF is explicitly disabled for stateless applications
+            // CSRF disabled because this is a stateless REST API using JWTs for auth.
+            // No cookies or sessions are used; CSRF protection is not applicable.
+            .csrf(csrf -> csrf.disable())
+
+            // Authorization config
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/").permitAll()
                 .anyRequest().authenticated())
+
+            // Stateless session
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // Add JWT filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000", 
+            "https://nus-iss-swe-5006-project-git-frontend-shihui21s-projects.vercel.app",
+            "https://nus-iss-swe-5006-project.vercel.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));

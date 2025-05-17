@@ -119,7 +119,7 @@ export default function RegisterPage() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-yellow-500 drop-shadow-md">
-            <span className="text-blue-500">Poké</span>Trade
+            {/* <span className="text-blue-500">Poké</span>Trade */}
           </h1>
           <p className="text-gray-600 mt-2">Join the Pokémon card trading community</p>
         </div>
@@ -197,9 +197,9 @@ export default function RegisterPage() {
                   className="grid grid-cols-2 gap-2"
                 >
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="Central Region" id="north" />
+                    <RadioGroupItem value="Central Region" id="central" />
                     <Label htmlFor="Central Region" className="cursor-pointer">
-                      North
+                      Central
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
@@ -209,15 +209,15 @@ export default function RegisterPage() {
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="East Region" id="south" />
+                    <RadioGroupItem value="East Region" id="east" />
                     <Label htmlFor="East Region" className="cursor-pointer">
-                      South
+                      East
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">
-                    <RadioGroupItem value="North East Region" id="east" />
+                    <RadioGroupItem value="North East Region" id="northeast" />
                     <Label htmlFor="North East Region" className="cursor-pointer">
-                      East
+                      North East
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-blue-50">

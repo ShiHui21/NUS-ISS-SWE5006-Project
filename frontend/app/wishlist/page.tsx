@@ -34,6 +34,7 @@ export default function WishlistPage() {
       try {
         const wishlistItems = await getWishlist()
         setWishlist(wishlistItems)
+        // console.log("wishlist items", wishlistItems)
       } catch (error) {
         console.error("Failed to fetch wishlist:", error)
         toast({
@@ -111,7 +112,7 @@ export default function WishlistPage() {
                       <PokemonCard
                         card={card}
                         onClick={() => {}} // No action on click
-                        // isSold={card.listingStatus === "Sold"}
+                        // listingStatus={card.listingStatus === "Sold"}
                       />
                       {/* Overlay with unheart icon */}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
