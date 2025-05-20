@@ -33,38 +33,16 @@ public class SecurityConfig {
         this.userService = userService;
     }
 
-//    @Bean
-//    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        return http
-//                .requiresChannel(channel ->
-//                        channel.anyRequest().requiresSecure())
-//                .authorizeRequests(authorize ->
-//                        authorize.anyRequest().permitAll())
-//                .build();
-//    }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//            .csrf(csrf -> csrf.disable())
-//            .authorizeHttpRequests(auth -> auth
-//                    .requestMatchers("/auth/**").permitAll()
-//                .anyRequest().authenticated())
-//            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             // Enforce HTTPS
-//            .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+        //    .requiresChannel(channel -> channel.anyRequest().requiresSecure())
 
-            // Enable CORS and disable CSRF
+            // Enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // CSRF disabled because this is a stateless REST API using JWTs for auth.
+            // No cookies or sessions are used; CSRF protection is not applicable.
             .csrf(csrf -> csrf.disable())
 
             // Authorization config
@@ -84,7 +62,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000", 
+            "https://nus-iss-swe-5006-project-git-frontend-shihui21s-projects.vercel.app",
+            "https://nus-iss-swe-5006-project.vercel.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
